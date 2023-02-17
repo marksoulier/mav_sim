@@ -156,7 +156,7 @@ class DynamicStateEuler:
         output[IND_EULER.Q, 0] = self.q
         output[IND_EULER.R, 0] = self.r
 
-        return types.DynamicState( output )
+        return output
 
 def derivatives_euler(state: types.DynamicStateEuler, forces_moments: types.ForceMoment) -> types.DynamicStateEuler:
     """Implements the dynamics xdot = f(x, u) where u is the force/moment vector

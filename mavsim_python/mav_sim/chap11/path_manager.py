@@ -47,8 +47,15 @@ class PathManager:
         self.manager_state = 1
 
         # Ensure that there are at least three waypoints for following
+        if waypoints.num_waypoints < 2:
+            raise ValueError("Path Manager: need at least two waypoints")
         if waypoints.num_waypoints < 3:
-            raise ValueError("Path Manager: need at least three waypoints")
+            # Add an additional waypoint after final
+            waypoint = waypoints.get_waypoint(1);
+            ned = waypoint.ned+waypoints.terminal_direction();
+            waypoints.add(ned=ned, airspeed=waypoint.airspeed, course=waypoint.course, cost=waypoint.cost)
+
+
 
     def manager_requests_waypoints(self) -> bool:
         """Indicates that the manager needs waypoints (i.e., reached the end of waypoints list)
