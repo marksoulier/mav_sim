@@ -71,8 +71,6 @@ def construct_fillet_line(waypoints: MsgWaypoints, ptr: WaypointIndices, radius:
     # Extract the waypoints (w_{i-1}, w_i, w_{i+1})
     (previous, current, next_wp) = extract_waypoints(waypoints=waypoints, ptr=ptr)
 
-
-
     # Construct the path
     path = MsgPath()
     path.plot_updated = False

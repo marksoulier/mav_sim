@@ -1,1 +1,0 @@
-For documentation on the python simulation, see [mavsim_python/README.md](mavsim_python/README.md)

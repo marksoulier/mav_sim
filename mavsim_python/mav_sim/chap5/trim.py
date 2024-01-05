@@ -78,7 +78,7 @@ def compute_trim_euler(state0: types.DynamicStateEuler, Va: float, gamma: float,
 
     # solve the minimization problem to find the trim states and inputs
     psi_weight = 100000. # Weight on convergence of psi
-    res = minimize(trim_objective_fun, x0, method='SLSQP', args=(Va, gamma, R, psi_weight), bounds=Bounds(lb=lb, ub=ub),
+    res = minimize(trim_objective_fun, x0[:,0], method='SLSQP', args=(Va, gamma, R, psi_weight), bounds=Bounds(lb=lb, ub=ub),
                    constraints=cons, options={'ftol': 1e-10, 'disp': False})
 
     # extract trim state and input and return

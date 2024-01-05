@@ -85,7 +85,7 @@ class ekfFullState:
             SENSOR.gps_course_sigma**2
         ])
         self.N = 2  # number of prediction step per sample
-        self.Ts = (SIM.ts_control / self.N)
+        self.Ts = SIM.ts_control / self.N
         self.xhat = np.array([[
                     MAV.north0,  # pn
                     MAV.east0,  # pe

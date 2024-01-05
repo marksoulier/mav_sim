@@ -74,16 +74,16 @@ JacobianMeasurement = Union[AttitudeMeasurement, PositionMeasurement]
 JacobianState = Union[AttitudeState, PositionState]
 
 
-Vector = typing.NewType("Vector", npt.NDArray[Any]) # 3x1 vector
-Points = typing.NewType("Points", npt.NDArray[Any]) # 3xn vector
+Vector = npt.NDArray[Any] # 3x1 vector
+Points = npt.NDArray[Any] # 3xn vector
 Quaternion = npt.NDArray[Any] # 4x1 quaternion
-RotMat = typing.NewType("RotMat", npt.NDArray[Any])  # 3x3 rotation matrix
-SkewSymMat = typing.NewType("SkewSymMat", npt.NDArray[Any]) # 3x3 skew symmetric matrix
+RotMat = npt.NDArray[Any] # 3x3 rotation matrix
+SkewSymMat = npt.NDArray[Any] # 3x3 skew symmetric matrix
 DynamicState = npt.NDArray[Any] # 13x1 array of state elements assuming quaternion attitude
 DynamicStateEuler = npt.NDArray[Any] # 12x1 array \
     # of state elements assuming euler coordinates for attitude
-ForceMoment = typing.NewType("ForceMoment", npt.NDArray[Any]) # 6x1 array of force/moment elements
-WindVector = typing.NewType("WindVector", npt.NDArray[Any]) # 6x1 array of wind -
+ForceMoment = npt.NDArray[Any] # 6x1 array of force/moment elements
+WindVector = npt.NDArray[Any] # 6x1 array of wind -
     #   The first three elements are the steady state wind in the inertial frame
     #   The second three elements are the gust in the body frame
 NP_MAT = npt.NDArray[Any]

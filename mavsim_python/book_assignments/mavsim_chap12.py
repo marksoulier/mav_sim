@@ -17,7 +17,7 @@ def main() -> None:
     """Provide a test scenario for chapter 12
     """
     # Initialize the simulation parameters
-    sim_params = MsgSimParams(end_time=500., video_name="cha12.avi") # Sim ending in 10 seconds
+    sim_params = MsgSimParams(end_time=500.) # Sim ending in 10 seconds
     state = DynamicState()
 
     # Final point definition

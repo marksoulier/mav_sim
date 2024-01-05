@@ -23,6 +23,8 @@ def dubins_manager(state: MsgState, waypoints: MsgWaypoints, ptr_prv: WaypointIn
     """Update for the Dubins path manager.
        Updates state machine if the MAV enters into the next halfspace.
 
+       Keep in mind that the constructor for DubinsParameters makes a call to dupins_parameters.compute_parameters()
+
     Args:
         state: current state of the vehicle
         waypoints: The waypoints to be followed
@@ -36,6 +38,10 @@ def dubins_manager(state: MsgState, waypoints: MsgWaypoints, ptr_prv: WaypointIn
                 3: Straight-line segment, up to H_2
                 4: First portion of ending circle
                 5: Second portion of the ending circle, up to H_3
+        dubins_path_prv: The path produced on the previous call to dubins_manager
+                * Garbage whenever a new set of waypoints is received (i.e. waypoints.flag_waypoints_changed is True)
+                * Can be completely ignored
+                * Can be used to avoid recalculatiing the dubins path variables when they should have remained unchanged
 
     Returns:
         path (MsgPath): Path to be followed
@@ -47,7 +53,8 @@ def dubins_manager(state: MsgState, waypoints: MsgWaypoints, ptr_prv: WaypointIn
     path = path_prv
     hs = hs_prv
     ptr = ptr_prv
-    dubins_path = dubins_path_prv
+    dubins_path = dubins_path_prv # Note that this should be changed when new waypoints received or
+                                  # a transition is made to a new waypoint path
 
     # Manage the Dubins sections
 

@@ -106,10 +106,16 @@ def run_auto_tests()->None:
         data = pickle.load(file)
 
         # Run the tests
-        velocity_constraint_test(tests=data["vel_constraint"])
-        velocity_constraint_partial_test(tests=data["vel_constraint_partial"])
-        variable_bounds_test(tests=data["variable_bounds"])
-        trim_objective_fun_test(tests=data["trim_objective_fun"])
+        succ = velocity_constraint_test(tests=data["vel_constraint"])
+        if succ:
+            succ = velocity_constraint_partial_test(tests=data["vel_constraint_partial"])
+        if succ:
+            succ = variable_bounds_test(tests=data["variable_bounds"])
+        if succ:
+            succ = trim_objective_fun_test(tests=data["trim_objective_fun"])
+
+        if not succ:
+            raise ValueError("Failed test")
 
 def velocity_constraint_test(tests: list[VelocityConstraintTest], threshold: float = 1e-4) -> bool:
     """Runs the test for the velocity constraint"""

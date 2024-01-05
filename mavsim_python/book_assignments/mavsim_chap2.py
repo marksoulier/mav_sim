@@ -10,7 +10,6 @@ import sys  # Used for exit
 
 import mav_sim.parameters.simulation_parameters as SIM  # parameters
 from mav_sim.chap2.mav_viewer import MavViewer  # Viewer for MAV
-from mav_sim.chap2.video_writer import VideoWriter  # Creation of videos
 from mav_sim.message_types.msg_state import MsgState  # message types
 
 
@@ -27,13 +26,7 @@ def main() -> int:
     state = MsgState()  # instantiate state message
 
     # initialize viewers and video
-    write_video = False  # True==write video, False==don't write video
     mav_view = MavViewer()
-
-    if write_video is True:
-        video = VideoWriter(video_name="chap2_video.avi",
-                            bounding_box=(0, 0, 1000, 1000),
-                            output_rate=SIM.ts_video)
 
     # initialize the simulation time
     sim_time = SIM.start_time
@@ -56,15 +49,11 @@ def main() -> int:
 
         # -------update viewer and video-------------
         mav_view.update(state)
-        if write_video is True:
-            video.update(sim_time)
 
         # -------increment time-------------
         sim_time += SIM.ts_simulation
 
     print("Press Ctrl-Q to exit...")
-    if write_video is True:
-        video.close()
 
     return 0
 

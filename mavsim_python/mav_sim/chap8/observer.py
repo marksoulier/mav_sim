@@ -266,7 +266,7 @@ class EkfPosition:
                     0.000001,  # pseudo measurement #2
                     ])
         self.N = 10  # number of prediction step per sample
-        self.Ts = (SIM.ts_control / self.N)
+        self.Ts = SIM.ts_control / self.N
 
         # Initial estimate for pn, pe, Vg, chi, wn, we, psi
         self.xhat = np.array([[0.0], [0.0], [25.0], [0.0], [0.0], [0.0], [0.0]])

@@ -7,7 +7,7 @@ def rot_x_test() -> None:
     """
     test rot_x function
     """
-    print("Starting rot_x test\n")
+    print("Starting rot_x test")
     # Inputs
     inputs = [{'angle': np.pi},
               {'angle': 1.5}]
@@ -18,21 +18,21 @@ def rot_x_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_x(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def rot_y_test() -> None:
     """
     test rot_y function
     """
-    print("Starting rot_y test\n")
+    print("Starting rot_y test")
     # Inputs
     inputs = [{'angle': np.pi},
               {'angle': 1.5}]
@@ -43,21 +43,21 @@ def rot_y_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_y(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def rot_z_test() -> None:
     """
     test rot_z function
     """
-    print("Starting rot_z test\n")
+    print("Starting rot_z test")
     # Inputs
     inputs = [{'angle': np.pi},
               {'angle': 1.5}]
@@ -68,21 +68,21 @@ def rot_z_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_z(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def rot_v_to_v1_test() -> None:
     """
     test rot_v_to_v1 function
     """
-    print("Starting rot_v_to_v1 test\n")
+    print("Starting rot_v_to_v1 test")
     # Inputs
     inputs = [{'psi': (3*np.pi)/4},
               {'psi': 2.5}]
@@ -93,21 +93,21 @@ def rot_v_to_v1_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_v_to_v1(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def rot_v1_to_v2_test() -> None:
     """
     test rot_v1_to_v2 function
     """
-    print("Starting rot_v1_to_v2 test\n")
+    print("Starting rot_v1_to_v2 test")
     # Inputs
     inputs = [{'theta': (3*np.pi)/4},
               {'theta': 2.5}]
@@ -118,21 +118,21 @@ def rot_v1_to_v2_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_v1_to_v2(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def rot_v2_to_b_test() -> None:
     """
     test rot_v2_to_b function
     """
-    print("Starting rot_v2_to_b test\n")
+    print("Starting rot_v2_to_b test")
     # Inputs
     inputs = [{'phi': (3*np.pi)/4},
               {'phi': 2.5}]
@@ -143,21 +143,20 @@ def rot_v2_to_b_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_v2_to_b(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+
     print("End of test\n")
 
 def rot_b_to_s_test() -> None:
     """
     test rot_b_to_s function
     """
-    print("Starting rot_b_to_s test\n")
+    print("Starting rot_b_to_s test")
     # Inputs
     inputs = [{'alpha': (3*np.pi)/4},
               {'alpha': 2.5}]
@@ -168,21 +167,20 @@ def rot_b_to_s_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_b_to_s(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+
     print("End of test\n")
 
 def rot_s_to_w_test() -> None:
     """
     test rot_s_to_w function
     """
-    print("Starting rot_s_to_w test\n")
+    print("Starting rot_s_to_w test")
     # Inputs
     inputs = [{'beta': (3*np.pi)/4},
               {'beta': 2.5}]
@@ -193,21 +191,20 @@ def rot_s_to_w_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_s_to_w(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
     print("End of test\n")
 
 def rot_v_to_b_test() -> None:
     """
     test rot_v_to_b function
     """
-    print("Starting rot_v_to_b test\n")
+    print("Starting rot_v_to_b test")
     # Inputs
     inputs = [{'psi': (3*np.pi)/4, 'theta': -(3*np.pi)/4, 'phi': np.pi/4},
               {'psi': 2.5,         'theta': 3.5,          'phi': 0.2}]
@@ -218,21 +215,20 @@ def rot_v_to_b_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_v_to_b(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
     print("End of test\n")
 
 def rot_b_to_v_test() -> None:
     """
     test rot_b_to_v function
     """
-    print("Starting rot_b_to_v test\n")
+    print("Starting rot_b_to_v test")
     # Inputs
     inputs = [{'psi': (3*np.pi)/4, 'theta': -(3*np.pi)/4, 'phi': np.pi/4},
               {'psi': 2.5,         'theta': 3.5,          'phi': 0.2}]
@@ -243,21 +239,21 @@ def rot_b_to_v_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = rot_b_to_v(**input_it)
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def trans_i_to_v_test() -> None:
     """
     test trans_i_to_v function
     """
-    print("Starting trans_i_to_v test\n")
+    print("Starting trans_i_to_v test")
     # Inputs
     class Pose:
         def __init__(self) -> None:
@@ -275,21 +271,20 @@ def trans_i_to_v_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = trans_i_to_v(**input_it) # type: ignore
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
     print("End of test\n")
 
 def trans_v_to_i_test() -> None:
     """
     test trans_v_to_i function
     """
-    print("Starting trans_v_to_i test\n")
+    print("Starting trans_v_to_i test")
     # Inputs
     class Pose:
         def __init__(self) -> None:
@@ -307,21 +302,22 @@ def trans_v_to_i_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = trans_v_to_i(**input_it) # type: ignore
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
+
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def trans_i_to_b_test() -> None:
     """
     test trans_i_to_b function
     """
-    print("Starting trans_i_to_b test\n")
+    print("Starting trans_i_to_b test")
     # Inputs
     class Pose:
         def __init__(self) -> None:
@@ -339,21 +335,21 @@ def trans_i_to_b_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = trans_i_to_b(**input_it) # type: ignore
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def trans_b_to_i_test() -> None:
     """
     test trans_b_to_i function
     """
-    print("Starting trans_b_to_i test\n")
+    print("Starting trans_b_to_i test")
     # Inputs
     class Pose:
         def __init__(self) -> None:
@@ -371,14 +367,14 @@ def trans_b_to_i_test() -> None:
     for input_it, output_it in zip(inputs, outputs):
         calculated_output = trans_b_to_i(**input_it) # type: ignore
 
-        print("Calculated output:")
-        print(calculated_output)
-        print("Expected output:")
-        print(output_it)
         if (1e-8 < np.abs(calculated_output - output_it)).any():
             print("Failed test!")
-        else:
-            print("Passed test")
+            print("Calculated output:")
+            print(calculated_output)
+            print("Expected output:")
+            print(output_it)
+            break
+
     print("End of test\n")
 
 def run_all_tests() -> None:

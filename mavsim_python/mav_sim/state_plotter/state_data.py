@@ -19,7 +19,7 @@ class StateData():
         self.sigma_bounds: Optional[list[int]] = sigma_bounds
         self.sigma_data: dict[int, dict[str, list[float]]] = {}
         self.current_sigma: float = 0.0 # Helps with 2D plot sigma bounds
-        self.has_sigma: bool = (self.sigma_bounds is not None)
+        self.has_sigma: bool = self.sigma_bounds is not None
         if self.has_sigma and self.sigma_bounds is not None:
             for bound in self.sigma_bounds:
                 self.sigma_data[bound] = {'lower':[], 'upper':[]}

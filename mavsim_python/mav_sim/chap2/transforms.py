@@ -95,10 +95,8 @@ def rot_v_to_v1(psi: float) -> RotMat:
     Returns:
         rot: Rotation matrix from frame v to v1
     """
-    # Calculate rotaiton matrix
-    rot = np.identity(3)
-    print("Need to implement")
-    return cast(RotMat, rot)
+    rot = rot_z(psi)
+    return rot
 
 def rot_v1_to_v2(theta: float) -> RotMat:
     """
@@ -110,10 +108,9 @@ def rot_v1_to_v2(theta: float) -> RotMat:
     Returns:
         rot: Rotation matrix from frame v1 to v2
     """
-    # Calculate rotaiton matrix
     rot = np.identity(3)
     print("Need to implement")
-    return cast(RotMat, rot)
+    return rot
 
 def rot_v2_to_b(phi: float) -> RotMat:
     """
@@ -125,10 +122,9 @@ def rot_v2_to_b(phi: float) -> RotMat:
     Returns:
         rot: Rotation matrix from frame v2 to b
     """
-    # Calculate rotaiton matrix
     rot = np.identity(3)
     print("Need to implement")
-    return cast(RotMat, rot)
+    return rot
 
 def rot_b_to_s(alpha: float) -> RotMat:
     """
@@ -140,10 +136,9 @@ def rot_b_to_s(alpha: float) -> RotMat:
     Returns:
         rot: Rotation matrix from body frame to stability frame
     """
-    # Calculate rotaiton matrix
     rot = np.identity(3)
     print("Need to implement")
-    return cast(RotMat, rot)
+    return rot
 
 def rot_s_to_w(beta: float) -> RotMat:
     """
@@ -155,10 +150,9 @@ def rot_s_to_w(beta: float) -> RotMat:
     Returns:
         rot: Rotation matrix from body frame to stability frame
     """
-    # Calculate rotaiton matrix
     rot = np.identity(3)
     print("Need to implement")
-    return cast(RotMat, rot)
+    return rot
 
 def rot_v_to_b(psi: float, theta: float, phi: float) -> RotMat:
     """

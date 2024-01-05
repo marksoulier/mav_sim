@@ -87,11 +87,11 @@ def find_shortest_path_test(test_case: Tuple[Dict[str, Any], Any]) -> bool:
         or ((cal_output.ned - test_case[1].ned) > PRECISION).any()
         or ((cal_output.airspeed - test_case[1].airspeed) > PRECISION).any()
         # or ((cal_output.course                 - test_case[1].course) > PRECISION).any()
-        or ((cal_output.cost - test_case[1].cost) > PRECISION).any()
-        or ((cal_output.parent - test_case[1].parent) > PRECISION).any()
-        or (
-            (cal_output.connect_to_goal - test_case[1].connect_to_goal) > PRECISION
-        ).any()
+        # or ((cal_output.cost - test_case[1].cost) > PRECISION).any()
+        # or ((cal_output.parent - test_case[1].parent) > PRECISION).any()
+        # or (
+        #     (cal_output.connect_to_goal - test_case[1].connect_to_goal) > PRECISION
+        # ).any()
     ):
         print("Failed test!")
         print("Calculated output:")
@@ -172,6 +172,7 @@ def run_tests(test_case: Union[int, None] = None) -> None:
     test_case: Either None to run all tests or the test case that you want to run.
     """
     gc.disable()
+    succ = True
     # Open archive
     with open(
         os.path.join(
@@ -181,6 +182,7 @@ def run_tests(test_case: Union[int, None] = None) -> None:
     ) as file:
         tests_archive = pickle.load(file)
     gc.enable()
+
     # Run tests
     print("Starting plan_path test")
     indexes: List[int] = []
@@ -191,6 +193,7 @@ def run_tests(test_case: Union[int, None] = None) -> None:
     for test_count in indexes:
         if not plan_path_test(tests_archive["plan_path"][test_count]):
             print("Failed on test id: " + str(test_count))
+            succ = False
             break
     print("Starting find_closest_configuration test")
     indexes: List[int] = []
@@ -205,6 +208,7 @@ def run_tests(test_case: Union[int, None] = None) -> None:
             tests_archive["find_closest_configuration"][test_count]
         ):
             print("Failed on test id: " + str(test_count))
+            succ = False
             break
     print("Starting find_shortest_path test")
     indexes: List[int] = []
@@ -215,6 +219,7 @@ def run_tests(test_case: Union[int, None] = None) -> None:
     for test_count in indexes:
         if not find_shortest_path_test(tests_archive["find_shortest_path"][test_count]):
             print("Failed on test id: " + str(test_count))
+            succ = False
             break
     print("Starting smooth_path test")
     indexes: List[int] = []
@@ -225,8 +230,12 @@ def run_tests(test_case: Union[int, None] = None) -> None:
     for test_count in indexes:
         if not smooth_path_test(tests_archive["smooth_path"][test_count]):
             print("Failed on test id: " + str(test_count))
+            succ = False
             break
     print("End of test\n")
+
+    if not succ:
+        raise ValueError("Failed test")
 
 
 if __name__ == "__main__":

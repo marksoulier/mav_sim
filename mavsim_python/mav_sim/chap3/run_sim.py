@@ -10,7 +10,6 @@ run_sim.py
 from typing import Optional
 
 from mav_sim.chap2.mav_viewer import MavViewer
-from mav_sim.chap2.video_writer import VideoWriter
 from mav_sim.chap3.data_viewer import DataViewer
 from mav_sim.chap3.mav_dynamics import DynamicState, ForceMoments, MavDynamics
 from mav_sim.message_types.msg_delta import MsgDelta
@@ -32,10 +31,6 @@ def run_sim(sim: MsgSimParams, init_state: DynamicState, fm: ForceMoments, mav_v
         mav_view = MavViewer()  # initialize the mav viewer
     if data_view is None:
         data_view = DataViewer()  # initialize view of data plots
-    if sim.write_video is True:
-        video = VideoWriter(video_name=sim.video_name,
-                            bounding_box=(0, 0, 1000, 1000),
-                            output_rate=sim.ts_video)
 
     # initialize elements of the architecture
     mav = MavDynamics(sim.ts_simulation, init_state)
@@ -64,13 +59,7 @@ def run_sim(sim: MsgSimParams, init_state: DynamicState, fm: ForceMoments, mav_v
                             sim.ts_plotting)
             next_plot_time += sim.ts_plotting
 
-        if sim.write_video is True:
-            video.update(sim_time)
-
         # -------increment time-------------
         sim_time += sim.ts_simulation
-
-    if sim.write_video is True:
-        video.close()
 
     return (mav_view, data_view)

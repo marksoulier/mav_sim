@@ -3,12 +3,15 @@
 
 import os
 import pickle
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 from mav_sim.chap3.mav_dynamics import IND
 from mav_sim.chap4.mav_dynamics import (
     forces_moments,
+    gravitational_force,
+    lateral_aerodynamics,
+    longitudinal_aerodynamics,
     motor_thrust_torque,
     update_velocity_data,
 )
@@ -18,6 +21,74 @@ from mav_sim.tools import types
 
 
 #############  Test structure definitions ########################
+class GravitationalForceTest:
+    """Stores a test for forces and moments"""
+    def __init__(self) -> None:
+        # Inputs
+        self.quat: types.Quaternion
+
+        # Outputs
+        self.out: types.Vector
+
+    def __str__(self) ->str:
+        """Outputs the object in a nice format"""
+        out =   "Inputs:\n quat:\n" + str(self.quat) + \
+                "\n\nExpected result:\n" + str(self.out)
+
+        return out
+
+class LateralDynamicsTest:
+    """Stores a test for forces and moments"""
+    def __init__(self) -> None:
+        # Inputs
+        self.p: float
+        self.r: float
+        self.Va: float
+        self.beta: float
+        self.aileron: float
+        self.rudder: float
+
+        # Outputs
+        self.out_f_lat: types.Vector
+        self.out_torque_lat: types.Vector
+
+    def __str__(self) ->str:
+        """Outputs the object in a nice format"""
+        out =   "Inputs:\n p: " + str(self.p) + \
+                "\nr = " + str(self.r) +\
+                "\nVa = " + str(self.Va) +\
+                "\nbeta = " + str(self.beta) +\
+                "\naileron = " + str(self.aileron) +\
+                "\nrudder = " + str(self.rudder) +\
+                "\n\nExpected results:\n f_lat:\n" + str(self.out_f_lat) +\
+                "\ntorque_lat:\n" + str(self.out_torque_lat)
+
+        return out
+
+class LongitudinalDynamicsTest:
+    """Stores a test for forces and moments"""
+    def __init__(self) -> None:
+        # Inputs
+        self.q: float
+        self.Va: float
+        self.alpha: float
+        self.elevator: float
+
+        # Outputs
+        self.out_f_lon: types.Vector
+        self.out_torque_lon: types.Vector
+
+    def __str__(self) ->str:
+        """Outputs the object in a nice format"""
+        out =   "Inputs:\n q: " + str(self.q) + \
+                "\nVa = " + str(self.Va) +\
+                "\nalpha = " + str(self.alpha) +\
+                "\nelevator = " + str(self.elevator) +\
+                "\n\nExpected results:\n f_lon:\n" + str(self.out_f_lon) +\
+                "\ntorque_lon:\n" + str(self.out_torque_lon)
+
+        return out
+
 class ForcesMomentsTest:
     """Stores a test for forces and moments"""
     def __init__(self) -> None:
@@ -108,7 +179,317 @@ class WindSimulationTest:
         return out
 
 
+#############  Auto test generation ######################
+def generate_tests()-> None:
+    """Generates and saves a pickle file with the randomly generated tests"""
+    # Generate tests
+    data: dict[str,Any] = {}
+    data["gravitational_force"] = generate_gravitational_force_tests()
+    data["lateral_aerodyn"] = generate_lateral_aerodynamic_tests()
+    data["longitudinal_aerodyn"] = generate_longitudinal_aerodynamic_tests()
+    data["forces_moments"] = generate_forces_moments_tests()
+    data["motor_cmd"] = generate_motor_thrust_torque_tests()
+    data["update_vel"] = generate_update_velocity_data_tests()
+    data["wind_simulation"] = generate_wind_simulation_tests()
+
+    # Save the tests
+    with open(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "ch04_test_archive.pkl"
+        ),
+        "wb",
+    ) as file:
+        pickle.dump(data, file)
+
+def generate_gravitational_force_tests(num_tests: int = 100) -> list[GravitationalForceTest]:
+    """Generates random test data and stores the results for the gravitational_force() function"""
+    # Initailize the results structure
+    tests: list[GravitationalForceTest] = []
+
+    # Generate the results for each test
+    for _ in range(num_tests):
+        # Generate the state
+        test = GravitationalForceTest()
+        test.quat = np.random.randn(4,1)*100.
+        test.quat = test.quat/np.linalg.norm(test.quat)
+
+        # Generate the output
+        test.out = gravitational_force(quat=test.quat)
+
+        # Store the test
+        tests.append(test)
+
+    return tests
+
+def generate_lateral_aerodynamic_tests(num_tests: int = 100) -> list[LateralDynamicsTest]:
+    """Generates random test data and stores the results"""
+    # Initailize the results structure
+    tests: list[LateralDynamicsTest] = []
+
+    # Generate the results for each test
+    for k in range(num_tests):
+        # Generate the state
+        test = LateralDynamicsTest()
+        test.p = np.random.randn()*100.
+        test.r = np.random.randn()*100.
+
+        # Generate the delta command
+        test.aileron = np.random.randn()*np.pi/2
+        test.rudder = np.random.randn()*np.pi/2
+
+        # Generate wind parameters
+        test.Va = np.random.rand()*35.
+        test.beta = np.random.randn()*np.pi/2
+
+        # test Va = 0
+        if k == 0:
+            test.Va = 0.
+
+        # Generate the output
+        test.out_f_lat, test.out_torque_lat = lateral_aerodynamics(
+            p=test.p, r=test.r,
+            Va=test.Va, beta=test.beta,
+            aileron=test.aileron, rudder=test.rudder)
+
+        # Store the test
+        tests.append(test)
+
+    return tests
+
+def generate_longitudinal_aerodynamic_tests(num_tests: int = 100) -> list[LongitudinalDynamicsTest]:
+    """Generates random test data and stores the results"""
+    # Initailize the results structure
+    tests: list[LongitudinalDynamicsTest] = []
+
+    # Generate the results for each test
+    for k in range(num_tests):
+        # Generate the state
+        test = LongitudinalDynamicsTest()
+        test.q = np.random.randn()*100.
+
+        # Generate the delta command
+        test.elevator = np.random.randn()*np.pi/2
+
+        # Generate wind parameters
+        test.Va = np.random.rand()*35.
+        test.alpha = np.random.randn()*np.pi/2
+
+        # test Va = 0
+        if k == 0:
+            test.Va = 0.
+
+        # Generate the output
+        test.out_f_lon, test.out_torque_lon = longitudinal_aerodynamics(
+            q=test.q,
+            Va=test.Va,
+            alpha=test.alpha,
+            elevator=test.elevator
+        )
+
+        # Store the test
+        tests.append(test)
+
+    return tests
+
+
+def generate_forces_moments_tests(num_tests: int = 100) -> list[ForcesMomentsTest]:
+    """Generates random test data and stores the results"""
+    # Initailize the results structure
+    tests: list[ForcesMomentsTest] = []
+
+    # Generate the results for each test
+    for k in range(num_tests):
+        # Generate the state
+        test = ForcesMomentsTest()
+        test.state = np.random.randn(13,1)*100.
+        test.state[IND.QUAT] = test.state[IND.QUAT]/np.linalg.norm(test.state[IND.QUAT])
+
+        # Generate the delta command
+        test.delta.aileron = np.random.randn()*np.pi/2
+        test.delta.elevator = np.random.randn()*np.pi/2
+        test.delta.rudder = np.random.randn()*np.pi/2
+        test.delta.throttle = np.random.rand()
+
+        # Generate wind parameters
+        test.Va = np.random.rand()*35.
+        test.beta = np.random.randn()*np.pi/2
+        test.alpha = np.random.randn()*np.pi/2
+
+        # test Va = 0
+        if k == 0:
+            test.Va = 0.
+
+        # Generate the output
+        test.out = forces_moments(state=test.state, delta=test.delta, Va=test.Va, beta=test.beta, alpha=test.alpha)
+
+        # Store the test
+        tests.append(test)
+
+    return tests
+
+def generate_motor_thrust_torque_tests(num_tests: int = 100) -> list[MotorThrustTorqueTest]:
+    """Generates random test data for and stores the results"""
+    # Initailize the results structure
+    tests: list[MotorThrustTorqueTest] = []
+
+    # Generate the results for each test
+    for k in range(num_tests):
+        # Generate the inputs
+        test = MotorThrustTorqueTest()
+        test.Va = np.random.rand()*35.
+        test.delta_t = np.random.rand()
+
+        # test Va = 0
+        if k == 0:
+            test.Va = 0.
+
+        # Generate the output
+        test.T_p, test.Q_p = motor_thrust_torque(Va=test.Va, delta_t=test.delta_t)
+
+        # Store the test
+        tests.append(test)
+
+    return tests
+
+def generate_update_velocity_data_tests(num_tests: int = 100) -> list[UpdateVelocityTest]:
+    """Generates random test data for update_velocity_data and stores the results"""
+    # Initailize the results structure
+    tests: list[UpdateVelocityTest] = []
+
+    # Generate the results for each test
+    for _ in range(num_tests):
+        # Generate the state
+        test = UpdateVelocityTest()
+        test.state = np.random.randn(13,1)*100.
+        test.state[IND.QUAT] = test.state[IND.QUAT]/np.linalg.norm(test.state[IND.QUAT])
+
+        # Generate the wind
+        test.wind = np.random.randn(6,1)*20.
+
+        # Generate the output
+        test.Va, test.alpha, test.beta, test.wind_inertial_frame = update_velocity_data(state=test.state, wind=cast(types.WindVector, test.wind) )
+
+        # Store the test
+        tests.append(test)
+
+    return tests
+
+def generate_wind_simulation_tests(num_tests: int = 100) -> list[WindSimulationTest]:
+    """Generates random test data for WindSimulation and stores the results"""
+    # Initailize the results structure
+    tests: list[WindSimulationTest] = []
+
+    # Generate the results for each test
+    for test_num in range(num_tests*3):
+        # Generate the state
+        test = WindSimulationTest()
+        wind_sim = WindSimulation(Ts=1.)
+
+        # Generate the input / output date for the result
+        for _ in range(10):
+            # Get the update
+            u = np.random.randn()
+            test.updates.append(u)
+
+            # Get the output
+            output_num = test_num%3
+            if output_num == 0:
+                y = wind_sim.u_w.update(u)
+            elif output_num == 1:
+                y = wind_sim.v_w.update(u)
+            else:
+                y = wind_sim.w_w.update(u)
+            test.outputs.append(y)
+
+        # Store the test
+        tests.append(test)
+
+    return tests
+
+
+
 #############  auto test run ######################
+def gravitational_force_tests(tests: list[GravitationalForceTest], threshold: float = 1e-4) -> bool:
+    """Runs the tests for gravitational_force()"""
+    # Evaluate the results
+    print("\nStarting gravitational_force test")
+    success = True
+    for test in tests:
+        # Generate the output
+        out = gravitational_force(quat=test.quat)
+
+        # Compare the output with the result
+        diff = np.linalg.norm(out - test.out)
+
+        if diff > threshold:
+            print("\n\nFailed test!")
+            print("test:\n", test, "\nactual result:\n", out)
+            success = False
+            break
+
+    # Indicate success
+    if success:
+        print("Passed test on gravitational_force")
+    return success
+
+def lateral_aerodynamics_tests(tests: list[LateralDynamicsTest], threshold: float = 1e-4) -> bool:
+    """Runs the tests for lateral_aerodynamics()"""
+    # Evaluate the results
+    print("\nStarting lateral_aerodynamics test")
+    success = True
+    for test in tests:
+        # Generate the output
+        f_lat, torque_lat = lateral_aerodynamics(
+            p=test.p, r=test.r,
+            Va=test.Va, beta=test.beta,
+            aileron=test.aileron, rudder=test.rudder)
+
+        # Compare the output with the result
+        diff = np.linalg.norm(f_lat - test.out_f_lat) + \
+               np.linalg.norm(torque_lat - test.out_torque_lat)
+
+        if diff > threshold:
+            print("\n\nFailed test!")
+            print("test:\n", test, "\nactual result: f_lat = \n", str(f_lat) )
+            print("torque_lat = \n", str(torque_lat) )
+            success = False
+            break
+
+    # Indicate success
+    if success:
+        print("Passed test on lateral_aerodynamics")
+    return success
+
+def longitudinal_aerodynamics_tests(tests: list[LongitudinalDynamicsTest], threshold: float = 1e-4) -> bool:
+    """Runs the tests for longitudinal_aerodynamics()"""
+    # Evaluate the results
+    print("\nStarting longitudinal_aerodynamics test")
+    success = True
+    for test in tests:
+        # Generate the output
+        f_lon, torque_lon = longitudinal_aerodynamics(
+            q=test.q,
+            Va=test.Va,
+            alpha=test.alpha,
+            elevator=test.elevator)
+
+        # Compare the output with the result
+        diff = np.linalg.norm(f_lon - test.out_f_lon) + \
+               np.linalg.norm(torque_lon - test.out_torque_lon)
+
+        if diff > threshold:
+            print("\n\nFailed test!")
+            print("test:\n", test, "\nactual result: f_lon = \n", str(f_lon) )
+            print("torque_lon = \n", str(torque_lon) )
+            success = False
+            break
+
+    # Indicate success
+    if success:
+        print("Passed test on longitudinal_aerodynamics")
+    return success
+
+
 def forces_moments_tests(tests: list[ForcesMomentsTest], threshold: float = 1e-4) -> bool:
     """Runs the tests for forces_moments()"""
     # Evaluate the results
@@ -125,6 +506,7 @@ def forces_moments_tests(tests: list[ForcesMomentsTest], threshold: float = 1e-4
             print("\n\nFailed test!")
             print("test:\n", test, "\nactual result:\n", out)
             success = False
+            break
 
     # Indicate success
     if success:
@@ -147,6 +529,7 @@ def motor_thrust_torque_tests(tests: list[MotorThrustTorqueTest], threshold: flo
             print("\n\nFailed test!")
             print("test:\n", test, "\nactual T_p: ", T_p, "\nactual Q_p: ", Q_p)
             success = False
+            break
 
     # Indicate success
     if success:
@@ -171,6 +554,7 @@ def update_velocity_data_tests(tests: list[UpdateVelocityTest], threshold: float
             print("test:\n", test, "\nactual Va: ", Va, "\nactual alpha: ", alpha)
             print("actual beta: ", beta, "\nactual wind_inertial_frame:\n", wind_inertial_frame)
             success = False
+            break
 
     # Indicate success
     if success:
@@ -213,6 +597,9 @@ def wind_simulation_tests(tests: list[WindSimulationTest], threshold: float = 1e
             # Increment the output counter
             output_count += 1
 
+            if not success:
+                break
+
         count += 1
 
     # Indicate success
@@ -232,12 +619,24 @@ def run_auto_tests()->None:
         data = pickle.load(file)
 
         # Run the tests
-        forces_moments_tests(tests=data["forces_moments"])
-        motor_thrust_torque_tests(tests=data["motor_cmd"])
-        update_velocity_data_tests(tests=data["update_vel"])
-        wind_simulation_tests(tests=data["wind_simulation"])
+        succ = gravitational_force_tests(tests=data["gravitational_force"])
+        if succ:
+            succ = lateral_aerodynamics_tests(tests=data["lateral_aerodyn"])
+        if succ:
+            succ = longitudinal_aerodynamics_tests(tests=data["longitudinal_aerodyn"])
+        if succ:
+            succ = forces_moments_tests(tests=data["forces_moments"])
+        if succ:
+            succ = motor_thrust_torque_tests(tests=data["motor_cmd"])
+        if succ:
+            update_velocity_data_tests(tests=data["update_vel"])
+        if succ:
+            wind_simulation_tests(tests=data["wind_simulation"])
 
-#############  hand tests ######################
+        if not succ:
+            raise ValueError("Failed test")
+
+
 def motor_thrust_torque_test() -> None:
     """Tests the motor_thrust_torque function."""
     print("Starting motor_thrust_torque test")
@@ -424,7 +823,7 @@ def update_velocity_data_test() -> None:
     ]
 
     for input_it, output_it in zip(inputs, outputs):
-        calculated_output = update_velocity_data(**input_it)  # type: ignore
+        calculated_output = update_velocity_data(**input_it)
 
         if (
             1e-6 < np.abs(np.array(calculated_output[0:2]) - np.array(output_it[0:2]))
@@ -480,4 +879,6 @@ def run_all_tests() -> None:
 
 
 if __name__ == "__main__":
+    #generate_tests()
+
     run_all_tests()

@@ -63,4 +63,4 @@ class WindSimulation:
         gust = np.array([[self.u_w.update(np.random.randn())],
                          [self.v_w.update(np.random.randn())],
                          [self.w_w.update(np.random.randn())]])
-        return types.WindVector( np.concatenate(( self._steady_state, gust )) )
+        return np.concatenate(( self._steady_state, gust ))

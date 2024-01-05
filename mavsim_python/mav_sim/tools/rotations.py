@@ -73,7 +73,7 @@ def Quaternion2Rotation(quaternion: types.Quaternion) -> types.RotMat: \
     R = np.array([[e1 ** 2.0 + e0 ** 2.0 - e2 ** 2.0 - e3 ** 2.0, 2.0 * (e1 * e2 - e3 * e0), 2.0 * (e1 * e3 + e2 * e0)],
                   [2.0 * (e1 * e2 + e3 * e0), e2 ** 2.0 + e0 ** 2.0 - e1 ** 2.0 - e3 ** 2.0, 2.0 * (e2 * e3 - e1 * e0)],
                   [2.0 * (e1 * e3 - e2 * e0), 2.0 * (e2 * e3 + e1 * e0), e3 ** 2.0 + e0 ** 2.0 - e1 ** 2.0 - e2 ** 2.0]])
-    R = types.RotMat( R/linalg.det(R) )
+    R = cast(types.RotMat, R/linalg.det(R))
 
     return R
 
@@ -120,7 +120,7 @@ def Rotation2Quaternion(R: types.RotMat) -> types.Quaternion: # pylint: disable=
     else:
         e3 = 0.5*np.sqrt(((r12-r21)**2+(r13+r31)**2+(r23+r32)**2)/(3-tmp))
 
-    return types.Quaternion( np.array([[e0], [e1], [e2], [e3]]) )
+    return np.array([[e0], [e1], [e2], [e3]])
 
 def rotz(theta: float) -> types.RotMat:
     """Calculates the rotation matrix about the z axis
@@ -150,4 +150,4 @@ def hat(omega: types.Vector) -> types.SkewSymMat:
     omega_hat = np.array([[0, -c, b],
                           [c, 0, -a],
                           [-b, a, 0]])
-    return types.SkewSymMat( omega_hat )
+    return omega_hat

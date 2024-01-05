@@ -22,7 +22,7 @@ class Signals:
         """Store variables to create a signal
         """
         self.amplitude: float = amplitude
-        self.frequency = frequency  # radians/sec
+        self.frequency = frequency  # Hz (1/sec)
         self.period = 1.0/frequency
         self.start_time = start_time  # sec
         self.duration = duration

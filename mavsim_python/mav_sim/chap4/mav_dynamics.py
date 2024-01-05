@@ -62,6 +62,29 @@ class MavDynamics:
         self.true_state = MsgState()
         self._update_true_state()
 
+    @property
+    def forces(self) -> types.Vector:
+        """Getter for the forces variable"""
+        return self._forces
+
+    @property
+    def moments(self) -> types.Vector:
+        """Getter for the moments variable"""
+        return self._moments
+
+    @property
+    def ts_simulation(self)->float:
+        """Getter for the ts_simulation"""
+        return self._ts_simulation
+
+    @ts_simulation.setter
+    def ts_simulation(self, value: float) -> None:
+        """Sets the time step as long as it is greater than zero"""
+        if value > 0:
+            self._ts_simulation = value
+
+
+
     ###################################
     # public functions
     def update(self, delta: MsgDelta, wind: types.WindVector, time_step: Optional[float] = None) -> None:
@@ -132,7 +155,7 @@ class MavDynamics:
         force_moment = np.zeros((6,1))
         force_moment[0:3] = self._forces
         force_moment[3:6] = self._moments
-        return ForceMoments(force_moment= cast(types.ForceMoment, force_moment) )
+        return ForceMoments(force_moment= force_moment)
 
     def get_euler(self) -> tuple[float, float, float]:
         '''Returns the roll, pitch, and yaw Euler angles based upon the state'''
@@ -149,7 +172,7 @@ class MavDynamics:
 
         [pn, pe, h, Va, alpha, beta, phi, theta, chi, p, q, r, Vg, wn, we, psi, gyro_bx, gyro_by, gyro_bz]
         """
-        quat = cast(types.Quaternion, self._state[IND.QUAT])
+        quat = self._state[IND.QUAT]
         phi, theta, psi = Quaternion2Euler(quat)
         pdot = Quaternion2Rotation(quat) @ self._state[IND.VEL]
         self.true_state.north = self._state.item(IND.NORTH)
@@ -188,16 +211,125 @@ def forces_moments(state: types.DynamicState, delta: MsgDelta, Va: float, beta: 
     Returns:
         Forces and Moments on the UAV (in body frame) np.matrix(fx, fy, fz, Mx, My, Mz)
     """
-    # Extract elements
-    fx = 0.
-    fz = 0.
-    fy =0.
-    Mx = 0.
-    My = 0.
-    Mz = 0.
+    # Extract angular rates
+    p = state.item(IND.P)
+    q = state.item(IND.Q)
+    r = state.item(IND.R)
 
-    print('mav_dynamics::forces_moments() Needs to be implemented')
-    return types.ForceMoment( np.array([[fx, fy, fz, Mx, My, Mz]]).T )
+    # Return combined vector
+    force_torque_vec = np.array([
+        [0.],
+        [0.],
+        [0.],
+        [0.],
+        [0.],
+        [0.]
+    ])
+    return force_torque_vec
+
+def gravitational_force(quat: types.Quaternion) -> types.Vector:
+    """ Computes the gravitational force on the aircraft in the body frame
+
+    Args:
+        quat: 4x1 quaternion vector
+
+    Returns:
+        types.Vector: The gravitational force due to gravity
+    """
+    # compute gravitaional forces in body frame
+    R = Quaternion2Rotation(quat) # rotation from body to world frame
+    f_g = np.array([[0.], [0.], [0.]]) # Force of gravity in body frame
+    return cast(types.Vector, f_g)
+
+def lateral_aerodynamics(p: float, r: float,
+                         Va: float, beta: float,
+                         aileron: float, rudder: float
+                         ) -> tuple[types.Vector, types.Vector]:
+    """ Computes the lateral aerodynamic force and torque in the body frame, each as a 3x1 vector
+
+    Note that the aerodynamic parameters are obtained from MAV (imported above).
+    For example, to get the lateral aerodynamic coefficient for force due to side slip angle,
+    you would use
+        MAV.C_Y_beta
+
+    Args:
+        p: roll rate - body frame - i
+        r: yaw rate - body frame - k
+        Va: Airspeed
+        beta: Side slip angle
+        alpha: Angle of attack
+        aileron: aileron command
+        rudder: rudder command
+
+    Returns:
+        tuple[types.Vector, types.Vector]: (f_lat,torque_lat)
+            f_lat: The lateral aerodynamic force
+            torque_lat: The lateral aerodynamic torque
+    """
+    # intermediate variables
+
+    if Va == 0.:
+        print("calculate something different here")
+    else:
+        print("calculate something different here")
+
+    # compute lateral forces in body frame
+    f_lat = np.array([[0.],
+                      [0.],
+                      [0.]  ])
+
+    # compute lateral torques in body frame
+    torque_lat = np.array([[0.], [.0], [0.]])
+
+    return (f_lat, torque_lat)
+
+def longitudinal_aerodynamics(q: float,
+                         Va: float, alpha: float,
+                         elevator: float
+                         ) -> tuple[types.Vector, types.Vector]:
+    """ Computes the longitudinal aerodynamic force and torque in the body frame, each as a 3x1 vector.
+
+    The lift model used combines the common linear behavior with a flat plat model for stall (4.9 - 4.10)
+
+    The drag model combines parasitic and induced drag (4.11)
+
+    Note that the aerodynamic parameters are obtained from MAV (imported above).
+    For example, to get the aerodynamic coefficient of lift due to the angle of attack,
+    you would use
+        MAV.C_L_alpha
+
+    Args:
+        p: roll rate - body frame - i
+        r: yaw rate - body frame - k
+        Va: Airspeed
+        beta: Side slip angle
+        alpha: Angle of attack
+        aileron: aileron command
+        rudder: rudder command
+
+    Returns:
+        tuple[types.Vector, types.Vector]: (f_lon,torque_lon)
+            f_lon: The lateral aerodynamic force
+            torque_lon: The lateral aerodynamic torque
+    """
+
+    # intermediate variables
+    if Va == 0.:
+        print("calculate something different here")
+    else:
+        print("calculate something different here")
+
+    # compute Lift and Drag coefficients
+
+    # compute Lift and Drag Forces
+
+    # compute longitudinal forces in body frame
+    f_lon = np.array([[0.], [0.], [0.]])
+
+    # compute logitudinal torque in body frame (see (4.5) )
+    torque_lon = np.array([[0.], [0.], [0.]])
+
+    return (f_lon, torque_lon)
 
 def motor_thrust_torque(Va: float, delta_t: float) -> tuple[float, float]:
     """ compute thrust and torque due to propeller  (See addendum by McLain)
@@ -217,7 +349,7 @@ def motor_thrust_torque(Va: float, delta_t: float) -> tuple[float, float]:
     return thrust_prop, torque_prop
 
 def update_velocity_data(state: types.DynamicState, \
-    wind: types.WindVector = types.WindVector( np.zeros((6,1)) ) \
+    wind: types.WindVector = np.zeros((6,1))  \
     )  -> tuple[float, float, float, types.NP_MAT]:
     """Calculates airspeed, angle of attack, sideslip, and velocity wrt wind
 
@@ -230,6 +362,7 @@ def update_velocity_data(state: types.DynamicState, \
         beta: Side slip angle
         wind_inertial_frame: Wind vector in inertial frame
     """
+    # Calculate wind
     steady_state = wind[0:3]
     gust = wind[3:6]
 

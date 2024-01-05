@@ -9,7 +9,6 @@ mavsim_python
 from typing import Optional
 
 import mav_sim.parameters.planner_parameters as PLAN
-from mav_sim.chap2.video_writer import VideoWriter
 from mav_sim.chap3.data_viewer import DataViewer
 from mav_sim.chap3.mav_dynamics import DynamicState
 from mav_sim.chap4.wind_simulation import WindSimulation
@@ -47,10 +46,6 @@ def run_sim(sim: MsgSimParams, end_pose: NP_MAT, init_state: Optional[DynamicSta
         world_view = WorldViewer()  # initialize the mav viewer
     if data_view is None:
         data_view = DataViewer()  # initialize view of data plots
-    if sim.write_video is True:
-        video = VideoWriter(video_name=sim.video_name,
-                            bounding_box=(0, 0, 1000, 1000),
-                            output_rate=sim.ts_video)
 
     # initialize elements of the architecture
     wind = WindSimulation(sim.ts_simulation)
@@ -102,13 +97,7 @@ def run_sim(sim: MsgSimParams, end_pose: NP_MAT, init_state: Optional[DynamicSta
                                 delta,  # input to aircraft
                                 sim.ts_plotting)
 
-        if sim.write_video is True:
-            video.update(sim_time)
-
         # -------increment time-------------
         sim_time += sim.ts_simulation
-
-    if sim.write_video is True:
-        video.close()
 
     return (world_view, data_view)

@@ -12,7 +12,6 @@ import mav_sim.parameters.aerosonde_parameters as MAV
 import mav_sim.parameters.simulation_parameters as SIM
 import numpy as np
 from mav_sim.chap2.mav_viewer import MavViewer
-from mav_sim.chap2.video_writer import VideoWriter
 from mav_sim.chap3.data_viewer import DataViewer
 from mav_sim.chap3.mav_dynamics import DynamicState
 from mav_sim.chap4.mav_dynamics import MavDynamics
@@ -65,10 +64,6 @@ def run_sim(sim: MsgSimParams, init_state: Optional[DynamicState] = None, \
         mav_view = MavViewer()  # initialize the mav viewer
     if data_view is None:
         data_view = DataViewer()  # initialize view of data plots
-    if sim.write_video is True:
-        video = VideoWriter(video_name=sim.video_name,
-                            bounding_box=(0, 0, 1000, 1000),
-                            output_rate=sim.ts_video)
 
     # initialize elements of the architecture
     wind = WindSimulation(SIM.ts_simulation, gust_params)
@@ -115,13 +110,7 @@ def run_sim(sim: MsgSimParams, init_state: Optional[DynamicState] = None, \
                             sim.ts_plotting)
 
 
-        if sim.write_video is True:
-            video.update(sim_time)
-
         # -------increment time-------------
         sim_time += sim.ts_simulation
-
-    if sim.write_video is True:
-        video.close()
 
     return (mav_view, data_view)

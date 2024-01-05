@@ -35,7 +35,7 @@ class StatePlot():
             self.plot = self.plotbox.plot(name=self.name)
         # Handle Sigma error bound plots
         self.sigma_bounds = args.sigma_bounds
-        self.has_sigma = (self.sigma_bounds is not None)
+        self.has_sigma = self.sigma_bounds is not None
         self.sigma_plots = {}
         if self.has_sigma and self.sigma_bounds is not None:
             dash_size = 4

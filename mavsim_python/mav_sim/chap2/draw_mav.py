@@ -4,7 +4,7 @@ mavsim_python: drawing tools
     - Update history:
         4/15/2019 - BGM
 """
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -33,7 +33,7 @@ class DrawMav:
         self.mav_points, self.mav_mesh_colors = get_points()
 
         # Transform the points to MAV location and orientation
-        mav_position = types.Vector( np.array([[state.north], [state.east], [-state.altitude]]) )
+        mav_position = np.array([[state.north], [state.east], [-state.altitude]])
 
         # NED coordinates
         # attitude of mav as a rotation matrix R from body to inertial
@@ -44,7 +44,7 @@ class DrawMav:
 
         # convert North-East Down to East-North-Up for rendering
         R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
-        translated_points = types.Points( R @ translated_points )
+        translated_points = R @ translated_points
 
         # convert points to triangular mesh defined as array of three 3D points (Nx3x3)
         mesh = points_to_mesh(translated_points)
@@ -63,7 +63,7 @@ class DrawMav:
         Args:
             state: Updated position and orientation variables for plotting
         """
-        mav_position = types.Vector( np.array([[state.north], [state.east], [-state.altitude]]) ) # NED coordinates
+        mav_position = np.array([[state.north], [state.east], [-state.altitude]]) # NED coordinates
         # attitude of mav as a rotation matrix R from body to inertial
         R = Euler2Rotation(state.phi, state.theta, state.psi)
         # rotate and translate points defining mav
@@ -71,7 +71,7 @@ class DrawMav:
         translated_points = translate_points(rotated_points, mav_position)
         # convert North-East Down to East-North-Up for rendering
         R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
-        translated_points = types.Points( R @ translated_points )
+        translated_points = R @ translated_points
         # convert points to triangular mesh defined as array of three 3D points (Nx3x3)
         mesh = points_to_mesh(translated_points)
         # draw MAV by resetting mesh using rotated and translated points
@@ -84,7 +84,7 @@ def rotate_points(points: types.Points, R: types.RotMat) -> types.Points:
     types.check_rotation_matrix(R)
 
     # Rotation points
-    rotated_points = types.Points( R @ points )
+    rotated_points = R @ points
     return rotated_points
 
 def translate_points(points: types.Points, translation: types.Vector) -> types.Points:
@@ -94,8 +94,8 @@ def translate_points(points: types.Points, translation: types.Vector) -> types.P
     types.check_vector(translation)
 
     # Translate points
-    translated_points = types.Points( points + np.dot(translation, np.ones([1, points.shape[1]])) )
-    return translated_points
+    translated_points = points + np.dot(translation, np.ones([1, points.shape[1]]))
+    return cast(types.Points, translated_points)
 
 def get_points() -> tuple[types.Points, npt.NDArray[Any] ]:
     """"
@@ -160,7 +160,7 @@ def get_points() -> tuple[types.Points, npt.NDArray[Any] ]:
       # vertical tail
 
     print("drawmav.py::get_points() Need to add the tail colors")
-    return types.Points(points), mesh_colors
+    return points, mesh_colors
 
 def points_to_mesh(points_in: types.Points) -> npt.NDArray[Any]:
     """"

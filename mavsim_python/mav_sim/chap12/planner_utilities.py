@@ -166,7 +166,7 @@ def points_along_path(start_pose: NP_MAT, end_pose: NP_MAT, N: int) -> NP_MAT:
         points: Points along line between start and end pose
     """
     points = start_pose
-    q: NP_MAT = (end_pose - start_pose)
+    q: NP_MAT = end_pose - start_pose
     L = np.linalg.norm(q)
     q = q / L
     w = start_pose

@@ -52,10 +52,11 @@ class Plotter:
 
         # initialize Qt gui application and window
         self.default_window_size = (1000, 800)
-        self.app = pg.QtGui.QApplication([])
-        self.window = pg.GraphicsWindow(title=window_title)
+        self.app = pg.QtWidgets.QApplication([])
+        self.window = pg.GraphicsLayoutWidget(title=window_title)
         self.window.resize(*self.default_window_size)
         self.window.setBackground(self.background_color)
+        self.window.show()
         self.old_windows: list[pg.GraphicsWindow] = []
         self.row_plot_count: int = 0
 
@@ -284,7 +285,7 @@ class Plotter:
         # Check for dimension issues
         if len(args.curves) % dim != 0:
             e = "Plot string error: dimension ({0}) does not match number of curves ({1}).".format(dim, args.curves)
-            raise Exception(e)
+            raise ValueError(e)
 
         if args.name is None and len(args.curves) > 0:
             if dim == 1:

@@ -12,11 +12,11 @@ from pyqtgraph import ViewBox
 class StatePlotbox():
     """Needs documentation
     """
-    def __init__(self, window: pg.GraphicsWindow, args: PlotboxArgs) -> None:
+    def __init__(self, window: pg.GraphicsView, args: PlotboxArgs) -> None:
         ''' Create a new plotbox wrapper object
 
         Arguments:
-            window (pg.GraphicsWindow): pyqtgraph window object in which to
+            window (pg.GraphicsView): pyqtgraph window object in which to
                 place this plotbox
             args (PlotboxArgs object): PlotboxArgs object which holds all the
                 appropriate arguments for the plotbox

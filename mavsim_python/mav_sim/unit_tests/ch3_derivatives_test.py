@@ -76,8 +76,10 @@ def run_tests()->None:
         data = pickle.load(file)
 
         # Run the tests
-        euler_derivatives_test(tests=data["euler"])
-        quat_derivatives_test(tests=data["quat"])
+        succ = euler_derivatives_test(tests=data["euler"]) and \
+               quat_derivatives_test(tests=data["quat"])
+        if not succ:
+            raise ValueError("Tests failed")
 
 if __name__ == "__main__":
     # Run tests

@@ -293,6 +293,7 @@ def run_tests(test_case: Union[int,None] = None) -> None:
     """
     gc.disable()
     # Open archive
+    succ = True
     with open(
         os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "ch11b_test_archive.pkl"
@@ -311,6 +312,7 @@ def run_tests(test_case: Union[int,None] = None) -> None:
             (tests_archive["inputs"][test_count], tests_archive["rsr"][test_count])
         ):
             print("Failed on test id: " + str(test_count))
+            succ = False
             break
     print("Starting RSL test")
     for test_count in indexes:
@@ -318,6 +320,7 @@ def run_tests(test_case: Union[int,None] = None) -> None:
             (tests_archive["inputs"][test_count], tests_archive["rsl"][test_count])
         ):
             print("Failed on test id: " + str(test_count))
+            succ = False
             break
     print("Starting LSR test")
     for test_count in indexes:
@@ -325,6 +328,7 @@ def run_tests(test_case: Union[int,None] = None) -> None:
             (tests_archive["inputs"][test_count], tests_archive["lsr"][test_count])
         ):
             print("Failed on test id: " + str(test_count))
+            succ = False
             break
     print("Starting LSL test")
     for test_count in indexes:
@@ -332,8 +336,12 @@ def run_tests(test_case: Union[int,None] = None) -> None:
             (tests_archive["inputs"][test_count], tests_archive["lsl"][test_count])
         ):
             print("Failed on test id: " + str(test_count))
+            succ = False
             break
     print("End of test\n")
+
+    if not succ:
+        raise ValueError("Failed test")
 
 
 if __name__ == "__main__":

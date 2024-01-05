@@ -145,9 +145,10 @@ def gen_follow_straight_line_vars() -> List[Tuple[Dict[str, Any], Any]]:
     return output
 
 
-def follow_straight_line_test(test_cases: List[Tuple[Dict[str, Any], Any]]) -> None:
+def follow_straight_line_test(test_cases: List[Tuple[Dict[str, Any], Any]]) -> bool:
     """Tests the follow_straight_line function."""
     print("Starting follow_straight_line test")
+    succ = True
     for test_case_it in test_cases:
         calculated_output = follow_straight_line(**test_case_it[0])
 
@@ -166,8 +167,10 @@ def follow_straight_line_test(test_cases: List[Tuple[Dict[str, Any], Any]]) -> N
             print(test_case_it[1].to_array())
             print("Difference:")
             print(calculated_output.to_array() - test_case_it[1].to_array())
+            succ = False
             break
     print("End of test\n")
+    return succ
 
 
 def gen_follow_orbit_vars() -> List[Tuple[Dict[str, Any], Any]]:
@@ -307,9 +310,10 @@ def gen_follow_orbit_vars() -> List[Tuple[Dict[str, Any], Any]]:
     return output
 
 
-def follow_orbit_test(test_cases: List[Tuple[Dict[str, Any], Any]]) -> None:
+def follow_orbit_test(test_cases: List[Tuple[Dict[str, Any], Any]]) -> bool:
     """Tests the follow_orbit function."""
     print("Starting follow_orbit test")
+    succ = True
     for test_case_it in test_cases:
         calculated_output = follow_orbit(**test_case_it[0])
 
@@ -328,8 +332,10 @@ def follow_orbit_test(test_cases: List[Tuple[Dict[str, Any], Any]]) -> None:
             print(test_case_it[1].to_array())
             print("Difference:")
             print(calculated_output.to_array() - test_case_it[1].to_array())
+            succ = False
             break
     print("End of test\n")
+    return succ
 
 
 def gen_test_archive() -> None:
@@ -361,8 +367,12 @@ def run_all_tests() -> None:
     ) as file:
         tests_archive = pickle.load(file)
     # Run tests
-    follow_straight_line_test(tests_archive["follow_straight_line"])
-    follow_orbit_test(tests_archive["follow_orbit"])
+    succ = follow_straight_line_test(tests_archive["follow_straight_line"])
+    if succ:
+        succ = follow_orbit_test(tests_archive["follow_orbit"])
+
+    if not succ:
+        raise ValueError("Failed test")
 
 
 if __name__ == "__main__":

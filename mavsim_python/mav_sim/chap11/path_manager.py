@@ -51,8 +51,8 @@ class PathManager:
             raise ValueError("Path Manager: need at least two waypoints")
         if waypoints.num_waypoints < 3:
             # Add an additional waypoint after final
-            waypoint = waypoints.get_waypoint(1);
-            ned = waypoint.ned+waypoints.terminal_direction();
+            waypoint = waypoints.get_waypoint(1)
+            ned = waypoint.ned+waypoints.terminal_direction()
             waypoints.add(ned=ned, airspeed=waypoint.airspeed, course=waypoint.course, cost=waypoint.cost)
 
 

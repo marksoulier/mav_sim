@@ -259,7 +259,7 @@ class EkfPosition:
                     0.000001,  # pseudo measurement #2
                     ])
         self.N = 10  # number of prediction step per sample
-        self.Ts = (SIM.ts_control / self.N)
+        self.Ts = SIM.ts_control / self.N
         self.xhat = np.array([[0.0], [0.0], [25.0], [0.0], [0.0], [0.0], [0.0]])
         self.P = np.diag([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
         self.gps_n_old = 9999.

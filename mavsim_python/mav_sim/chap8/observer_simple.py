@@ -253,7 +253,7 @@ class EkfPosition:
                     SENSOR.gps_course_sigma**2,  # y_gps_course
                     ])
         self.N = 10  # number of prediction step per sample
-        self.Ts = (SIM.ts_control / self.N)
+        self.Ts = SIM.ts_control / self.N
         self.xhat = np.array([[0.0], [0.0], [25.0], [0.0], [0.0]])
         self.P = np.diag([1.0, 1.0, 1.0, 1.0, 1.0])
         self.gps_n_old = 9999.
@@ -295,7 +295,7 @@ class EkfPosition:
         chi = x.item(3)
         psi = x.item(4)
         psidot = (state.q * np.sin(state.phi) + state.r * np.cos(state.phi)) / np.cos(state.theta)
-        Vgdot = (psidot * state.Va *  np.sin(chi - psi))
+        Vgdot = psidot * state.Va *  np.sin(chi - psi)
         f_ = np.array([[Vg * np.cos(chi)],
                        [Vg * np.sin(chi)],
                        [Vgdot],

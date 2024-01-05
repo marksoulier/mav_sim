@@ -10,7 +10,6 @@ import copy
 import mav_sim.parameters.simulation_parameters as SIM
 import numpy as np
 from mav_sim.chap2.mav_viewer import MavViewer
-from mav_sim.chap2.video_writer import VideoWriter
 from mav_sim.chap3.data_viewer import DataViewer
 from mav_sim.chap4.wind_simulation import WindSimulation
 from mav_sim.chap6.autopilot import Autopilot
@@ -23,13 +22,8 @@ from mav_sim.message_types.msg_autopilot import MsgAutopilot
 from mav_sim.tools.signals import Signals
 
 # initialize the visualization
-VIDEO = False  # True==write video, False==don't write video
 mav_view = MavViewer()  # initialize the mav viewer
 data_view = DataViewer()  # initialize view of data plots
-if VIDEO is True:
-    video = VideoWriter(video_name="chap8_video.avi",
-                        bounding_box=(0, 0, 1000, 1000),
-                        output_rate=SIM.ts_video)
 
 # initialize elements of the architecture
 wind = WindSimulation(SIM.ts_simulation)
@@ -84,11 +78,5 @@ while sim_time < SIM.end_time:
                      commanded_state,  # commanded states
                      delta,  # input to aircraft
                      SIM.ts_simulation)
-    if VIDEO is True:
-        video.update(sim_time)
-
     # -------increment time-------------
     sim_time += SIM.ts_simulation
-
-if VIDEO is True:
-    video.close()

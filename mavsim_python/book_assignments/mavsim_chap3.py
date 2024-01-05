@@ -17,12 +17,12 @@ def main() -> None:
     """Provide a test scenario
     """
     # Initialize the simulation parameters
-    sim_params = MsgSimParams(end_time=100., video_name="chap3.avi") # Sim ending in 10 seconds
+    sim_params = MsgSimParams(end_time=100.) # Sim ending in 100 seconds
     state = DynamicState(state=np.zeros([13,1]))
     state.down = -5.
     state.u = 1
     state.set_attitude_euler(0., 0., np.pi/4)
-    fm = ForceMoments(force_moment=np.zeros([6,1])) # type: ignore
+    fm = ForceMoments(force_moment=np.zeros([6,1]))
     fm.l = 0.01
 
     # Run the simulation
