@@ -53,7 +53,10 @@ def rot_x(angle: float) -> RotMat:
 
     # Calculate rotaiton matrix
     rot = np.identity(3)
-    print("Need to implement")
+    rot[1, 1] = c
+    rot[1, 2] = -s
+    rot[2, 1] = s
+    rot[2, 2] = c
     return cast(RotMat, rot)
 
 def rot_y(angle: float) -> RotMat:
@@ -65,9 +68,15 @@ def rot_y(angle: float) -> RotMat:
     Returns:
         rot: rotation matrix about y-axis
     """
+    c = np.cos(angle)
+    s = np.sin(angle)
+
     # Calculate rotaiton matrix
     rot = np.identity(3)
-    print("Need to implement")
+    rot[1, 1] = c
+    rot[1, 2] = s
+    rot[2, 1] = -s
+    rot[2, 2] = c
     return cast(RotMat, rot)
 
 def rot_z(angle: float) -> RotMat:

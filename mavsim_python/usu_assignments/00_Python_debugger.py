@@ -11,8 +11,8 @@ def debug_this_function() -> None:
     v2 = np.array([[4], [5], [6]])
 
     # Use matrix multiplication to get the results of the dot product between the two matrices
-    # Run in debug mode and use different features of the debug tool
-    res = v1@v2
+
+    res = np.dot(v1.reshape(3,), v2.reshape(3,))
     print("resulting multiplication: ", res)
 
 
