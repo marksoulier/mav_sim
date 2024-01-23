@@ -144,6 +144,7 @@ def get_points() -> tuple[types.Points, npt.NDArray[Any] ]:
     green = np.array([0., 1., 0., 1])
     blue = np.array([0., 0., 1., 1])
     yellow = np.array([1., 1., 0., 1])
+    pink = np.array([1., 0., 1., 1])
     mesh_colors = np.empty((13, 3, 4), dtype=np.float32)
     mesh_colors[0] = yellow  # nose-top
     mesh_colors[1] = yellow  # nose-right
@@ -155,11 +156,11 @@ def get_points() -> tuple[types.Points, npt.NDArray[Any] ]:
     mesh_colors[7] = red  # fuselage-bottom
     mesh_colors[8] = green  # wing
     mesh_colors[9] = green  # wing
-      # horizontal tail
-      # horizontal tail
-      # vertical tail
+    mesh_colors[10] = pink  # horizontal tail
+    mesh_colors[11] = pink  # horizontal tail
+    mesh_colors[12] = pink  # vertical tail
 
-    print("drawmav.py::get_points() Need to add the tail colors")
+    # print("drawmav.py::get_points() Need to add the tail colors")
     return points, mesh_colors
 
 def points_to_mesh(points_in: types.Points) -> npt.NDArray[Any]:
@@ -183,9 +184,9 @@ def points_to_mesh(points_in: types.Points) -> npt.NDArray[Any]:
                         [points[5], points[3], points[4]],  # fuselage-bottom
                         [points[6], points[7], points[9]],  # wing
                         [points[7], points[8], points[9]],  # wing
-                          # horizontal tail
-                          # horizontal tail
-                          # vertical tail
+                        [points[10], points[12], points[13]],  # horizontal tail
+                        [points[10], points[12], points[11]],  # horizontal tail
+                        [points[5], points[14], points[15]],  # vertical tail
                         ])
-    print("drawmav.py::points_to_mesh() Need to create the horizontal and vertical components of the tail")
+    # print("drawmav.py::points_to_mesh() Need to create the horizontal and vertical components of the tail")
     return mesh

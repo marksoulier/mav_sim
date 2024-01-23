@@ -52,11 +52,7 @@ def rot_x(angle: float) -> RotMat:
     s = np.sin(angle)
 
     # Calculate rotaiton matrix
-    rot = np.identity(3)
-    rot[1, 1] = c
-    rot[1, 2] = -s
-    rot[2, 1] = s
-    rot[2, 2] = c
+    rot = np.matrix([[1, 0, 0], [0, c, s], [0, -s, c]])
     return cast(RotMat, rot)
 
 def rot_y(angle: float) -> RotMat:
@@ -72,11 +68,7 @@ def rot_y(angle: float) -> RotMat:
     s = np.sin(angle)
 
     # Calculate rotaiton matrix
-    rot = np.identity(3)
-    rot[1, 1] = c
-    rot[1, 2] = s
-    rot[2, 1] = -s
-    rot[2, 2] = c
+    rot = np.matrix([[c, 0, -s], [0, 1, 0], [s, 0, c]])
     return cast(RotMat, rot)
 
 def rot_z(angle: float) -> RotMat:
@@ -88,9 +80,11 @@ def rot_z(angle: float) -> RotMat:
     Returns:
         rot: rotation matrix about z-axis
     """
+    c = np.cos(angle)
+    s = np.sin(angle)
+
     # Calculate rotaiton matrix
-    rot = np.identity(3)
-    print("Need to implement")
+    rot = np.matrix([[c, s, 0], [-s, c, 0], [0, 0, 1]])
     return cast(RotMat, rot)
 
 # Rotation matrices between concentric frames
@@ -117,8 +111,7 @@ def rot_v1_to_v2(theta: float) -> RotMat:
     Returns:
         rot: Rotation matrix from frame v1 to v2
     """
-    rot = np.identity(3)
-    print("Need to implement")
+    rot = rot_y(theta)
     return rot
 
 def rot_v2_to_b(phi: float) -> RotMat:
@@ -131,8 +124,7 @@ def rot_v2_to_b(phi: float) -> RotMat:
     Returns:
         rot: Rotation matrix from frame v2 to b
     """
-    rot = np.identity(3)
-    print("Need to implement")
+    rot = rot_x(phi)
     return rot
 
 def rot_b_to_s(alpha: float) -> RotMat:
@@ -145,8 +137,8 @@ def rot_b_to_s(alpha: float) -> RotMat:
     Returns:
         rot: Rotation matrix from body frame to stability frame
     """
-    rot = np.identity(3)
-    print("Need to implement")
+    rot_s_to_b = rot_y(alpha)
+    rot = np.linalg.inv(rot_s_to_b)
     return rot
 
 def rot_s_to_w(beta: float) -> RotMat:
@@ -159,8 +151,7 @@ def rot_s_to_w(beta: float) -> RotMat:
     Returns:
         rot: Rotation matrix from body frame to stability frame
     """
-    rot = np.identity(3)
-    print("Need to implement")
+    rot = rot_z(beta)
     return rot
 
 def rot_v_to_b(psi: float, theta: float, phi: float) -> RotMat:
@@ -176,8 +167,7 @@ def rot_v_to_b(psi: float, theta: float, phi: float) -> RotMat:
         rot: Rotation matrix from vehicle frame to body frame
     """
     # Calculate rotaiton matrix
-    rot = np.identity(3)
-    print("Need to implement")
+    rot = rot_v2_to_b(phi)@rot_v1_to_v2(theta)@rot_v_to_v1(psi)
     return cast(RotMat, rot)
 
 def rot_b_to_v(psi: float, theta: float, phi: float) -> RotMat:
@@ -192,9 +182,8 @@ def rot_b_to_v(psi: float, theta: float, phi: float) -> RotMat:
     Returns:
         rot: Rotation matrix from body frame to vehicle frame
     """
-   # Calculate rotaiton matrix
-    rot = np.identity(3)
-    print("Need to implement")
+    # Calculate rotation matrix
+    rot = np.linalg.inv(rot_v_to_b(psi, theta, phi))
     return cast(RotMat, rot)
 
 # Calculating the transforms of points
@@ -208,8 +197,10 @@ def trans_i_to_v(pose: Pose, p_i: Points) -> Points:
     Returns:
         p_v: Point represented in the vehicle frame
     """
-    print("Need to implement")
-    return p_i
+    # a transformation from inertial frame to vehicle frame
+    #subtract P_i to the pose
+    p_v: Points = p_i - np.array([[pose.north], [pose.east], [-pose.altitude]])
+    return p_v
 
 def trans_v_to_i(pose: Pose, p_v: Points) -> Points:
     """
@@ -221,8 +212,10 @@ def trans_v_to_i(pose: Pose, p_v: Points) -> Points:
     Returns:
         p_i: Point represented in the inertial frame
     """
-    print("Need to implement")
-    return p_v
+    # a transformation from vehicle frame to inertial frame
+    #add P_i to the pose
+    p_i: Points = p_v + np.array([[pose.north], [pose.east], [-pose.altitude]])
+    return p_i
 
 def trans_i_to_b(pose: Pose, p_i: Points) -> Points:
     """
@@ -234,9 +227,9 @@ def trans_i_to_b(pose: Pose, p_i: Points) -> Points:
     Returns:
         p_b: Point represented in the body frame
     """
-
-    print("Need to implement")
-    return p_i
+    # p_b = Rv to b times p_i + pose position
+    p_b = rot_v_to_b(pose.psi, pose.theta, pose.phi)@(trans_i_to_v(pose, p_i))
+    return p_b
 
 def trans_b_to_i(pose: Pose, p_b: Points) -> Points:
     """
@@ -248,6 +241,7 @@ def trans_b_to_i(pose: Pose, p_b: Points) -> Points:
     Returns:
         p_i: Point represented in the inertial frame
     """
-
-    print("Need to implement")
-    return p_b
+    # p_i = Rv to b times p_b - pose position
+    p_v = rot_b_to_v(pose.psi, pose.theta, pose.phi)@p_b
+    p_i = trans_v_to_i(pose, p_v)
+    return p_i
