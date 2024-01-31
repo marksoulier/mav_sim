@@ -13,9 +13,10 @@ part of mavsimPy
 """
 import mav_sim.parameters.aerosonde_parameters as MAV
 import numpy as np
-from mav_sim.chap3.mav_dynamics import IND, ForceMoments
+from mav_sim.chap3.mav_dynamics import IND
 from mav_sim.tools import types
-from mav_sim.tools.rotations import Euler2Quaternion, Euler2Rotation, Quaternion2Euler
+from mav_sim.tools.rotations import Euler2Quaternion, Quaternion2Euler, Quaternion2Rotation
+
 
 
 # Indexing constants for state using Euler representation
@@ -168,19 +169,63 @@ def derivatives_euler(state: types.DynamicStateEuler, forces_moments: types.Forc
     Returns:
         Time derivative of the state ( f(x,u), where u is the force/moment vector )
     """
+    st = DynamicStateEuler(state)
+
+    # fm = ForceMoments(forces_moments)
+
+    #derivitives of attitude
+    pqr = np.array([[st.p],[st.q],[st.r]])
+
+    M = np.array([[1, np.sin(st.phi)*np.tan(st.theta), np.cos(st.phi)*np.tan(st.theta)],
+                  [0, np.cos(st.phi), -np.sin(st.phi)],
+                  [0, np.sin(st.phi)/np.cos(st.theta), np.cos(st.phi)/np.cos(st.theta)]])
+    
+    altitude_dot = M@pqr
+
+    #define the matrix A and B
+    A = np.matrix([[MAV.gamma1*st.q*st.p-MAV.gamma2*st.r*st.q],
+                [MAV.gamma5*st.p*st.r-MAV.gamma6*(st.p**2-st.r**2)],
+                [MAV.gamma7*st.p*st.q-MAV.gamma1*st.q*st.r]])
+
+    B = np.matrix([[MAV.gamma3*forces_moments.item(3)+MAV.gamma4*forces_moments.item(5)],
+                   [1/MAV.Jy*forces_moments.item(4)],
+                   [MAV.gamma4*forces_moments.item(3)+MAV.gamma8*forces_moments.item(5)]])
+
+    #calculate the derivative of the body rates
+    pqr_dot = A+B
+
+    #define combination of euler angles
+    R = Quaternion2Rotation(Euler2Quaternion(st.phi, st.theta, st.psi))
+
+    #define the translational velocity vector
+    V = np.array([[st.u],[st.v],[st.w]])
+
+    #calculate the derivative of the position velocity
+    v_dot = R@V
+    
+    #calculate cross product vecotr
+    cross = np.matrix([[st.r*st.v-st.q*st.w],[st.p*st.w-st.r*st.u],[st.q*st.u-st.p*st.v]])
+
+    #vector if forces
+    f = np.array([[forces_moments.item(0)],[forces_moments.item(1)],[forces_moments.item(2)]])
+
+    #calculate the derivative of the velocity
+    u_dot = cross + (1/MAV.mass)*f
+
+
     # collect the derivative of the states
     x_dot = np.empty( (IND_EULER.NUM_STATES,1) )
-    x_dot[IND_EULER.NORTH] = 0.
-    x_dot[IND_EULER.EAST] = 0.
-    x_dot[IND_EULER.DOWN] = 0.
-    x_dot[IND_EULER.U] = 0.
-    x_dot[IND_EULER.V] = 0.
-    x_dot[IND_EULER.W] = 0.
-    x_dot[IND_EULER.PHI] = 0.
-    x_dot[IND_EULER.THETA] = 0.
-    x_dot[IND_EULER.PSI] = 0.
-    x_dot[IND_EULER.P] = 0.
-    x_dot[IND_EULER.Q] = 0.
-    x_dot[IND_EULER.R] = 0.
+    x_dot[IND_EULER.NORTH] = v_dot.item(0)
+    x_dot[IND_EULER.EAST] = v_dot.item(1)
+    x_dot[IND_EULER.DOWN] = v_dot.item(2)
+    x_dot[IND_EULER.U] = u_dot.item(0)
+    x_dot[IND_EULER.V] = u_dot.item(1)
+    x_dot[IND_EULER.W] = u_dot.item(2)
+    x_dot[IND_EULER.PHI] = altitude_dot.item(0)
+    x_dot[IND_EULER.THETA] = altitude_dot.item(1)
+    x_dot[IND_EULER.PSI] = altitude_dot.item(2)
+    x_dot[IND_EULER.P] = pqr_dot.item(0)
+    x_dot[IND_EULER.Q] = pqr_dot.item(1)
+    x_dot[IND_EULER.R] = pqr_dot.item(2)
 
     return x_dot

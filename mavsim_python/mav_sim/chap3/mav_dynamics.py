@@ -290,20 +290,73 @@ def derivatives(state: types.DynamicState, forces_moments: types.ForceMoment) ->
     Returns:
         Time derivative of the state ( f(x,u), where u is the force/moment vector )
     """
+
+    st = DynamicState(state)
+
+    # fm = ForceMoments(forces_moments)
+
+    #define matrix for quaternions
+    M = np.matrix([[0, -st.p, -st.q, -st.r],
+                    [st.p, 0, st.r, -st.q],
+                    [st.q, -st.r, 0, st.p],
+                    [st.r, st.q, -st.p, 0]])
+
+    #define quarternion vector and normalize
+    e = np.array([[st.e0],
+                [st.e1],
+                [st.e2],
+                [st.e3]])
+    e = e/np.linalg.norm(e)
+
+    #do matrix multiplication of M and e
+    e_dot = M@e
+
+    e_dot = e_dot/2
+
+    #define the matrix A and B
+    A = np.matrix([[MAV.gamma1*st.q*st.p-MAV.gamma2*st.r*st.q],
+                [MAV.gamma5*st.p*st.r-MAV.gamma6*(st.p**2-st.r**2)],
+                [MAV.gamma7*st.p*st.q-MAV.gamma1*st.q*st.r]])
+
+    B = np.matrix([[MAV.gamma3*forces_moments.item(3)+MAV.gamma4*forces_moments.item(5)],
+                   [1/MAV.Jy*forces_moments.item(4)],
+                   [MAV.gamma4*forces_moments.item(3)+MAV.gamma8*forces_moments.item(5)]])
+
+    #calculate the derivative of the body rates
+    pqr_dot = A+B
+
+    #define rotation matrix of e_b_i
+    R = Quaternion2Rotation(state[IND.QUAT])
+
+    #define the translational velocity vector
+    V = np.array([[st.u],[st.v],[st.w]])
+
+    #calculate the derivative of the position velocity
+    v_dot = R@V
+    
+    #calculate cross product vecotr
+    cross = np.matrix([[st.r*st.v-st.q*st.w],[st.p*st.w-st.r*st.u],[st.q*st.u-st.p*st.v]])
+
+    #vector if forces
+    f = np.array([[forces_moments.item(0)],[forces_moments.item(1)],[forces_moments.item(2)]])
+
+    #calculate the derivative of the velocity
+    u_dot = cross + (1/MAV.mass)*f
+
     # collect the derivative of the states
     x_dot = np.empty( (IND.NUM_STATES,1) )
-    x_dot[IND.NORTH] = 0.
-    x_dot[IND.EAST] = 0.
-    x_dot[IND.DOWN] = 0.
-    x_dot[IND.U] = 0.
-    x_dot[IND.V] = 0.
-    x_dot[IND.W] = 0.
-    x_dot[IND.E0] = 0.
-    x_dot[IND.E1] = 0.
-    x_dot[IND.E2] = 0.
-    x_dot[IND.E3] = 0.
-    x_dot[IND.P] = 0.
-    x_dot[IND.Q] = 0.
-    x_dot[IND.R] = 0.
+    x_dot[IND.NORTH] = v_dot.item(0)
+    x_dot[IND.EAST] = v_dot.item(1)
+    x_dot[IND.DOWN] = v_dot.item(2)
+    x_dot[IND.U] = u_dot.item(0)
+    x_dot[IND.V] = u_dot.item(1)
+    x_dot[IND.W] = u_dot.item(2)
+    x_dot[IND.E0] = e_dot.item(0)
+    x_dot[IND.E1] = e_dot.item(1)
+    x_dot[IND.E2] = e_dot.item(2)
+    x_dot[IND.E3] = e_dot.item(3)
+    x_dot[IND.P] = pqr_dot.item(0)
+    x_dot[IND.Q] = pqr_dot.item(1)
+    x_dot[IND.R] = pqr_dot.item(2)
 
     return x_dot
