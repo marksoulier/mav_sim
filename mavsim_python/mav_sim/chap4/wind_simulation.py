@@ -42,15 +42,24 @@ class WindSimulation:
             sigma_u = 0.0
             sigma_v = 0.0
             sigma_w = 0.0
-        print("WindSimulation::__init__() Need to implement")
-        self.u_w = TransferFunction(num=np.array([[0]]),
-                                     den=np.array([[1,1]]),
+        #   Dryden gust model parameters
+        a1 = sigma_u*np.sqrt(2*Va/(Lu*np.pi))
+        a2 = sigma_v*np.sqrt(3*Va/(Lv*np.pi))
+        a3 = sigma_w*np.sqrt(3*Va/(Lw*np.pi))
+        b1 = Va/Lu
+        b22 = Va/Lv
+        b21 = Va/(np.sqrt(3)*Lv)
+        b31 = Va/(np.sqrt(3)*Lw)
+        b32 = Va/Lw
+
+        self.u_w = TransferFunction(num=np.array([[a1]]),
+                                     den=np.array([[1,b1]]),
                                      Ts=Ts)
-        self.v_w = TransferFunction(num=np.array([[0]]),
-                                     den=np.array([[1,1]]),
+        self.v_w = TransferFunction(num=np.array([[a2, a2*b21]]),
+                                     den=np.array([[1,2*b22,b22**2]]),
                                      Ts=Ts)
-        self.w_w = TransferFunction(num=np.array([[0]]),
-                                     den=np.array([[1,1]]),
+        self.w_w = TransferFunction(num=np.array([[a3, a3*b31]]),
+                                     den=np.array([[1, 2*b32,b32**2]]),
                                      Ts=Ts)
         self._Ts = Ts
 

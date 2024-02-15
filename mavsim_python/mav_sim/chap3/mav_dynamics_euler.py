@@ -15,8 +15,11 @@ import mav_sim.parameters.aerosonde_parameters as MAV
 import numpy as np
 from mav_sim.chap3.mav_dynamics import IND
 from mav_sim.tools import types
-from mav_sim.tools.rotations import Euler2Quaternion, Quaternion2Euler, Quaternion2Rotation
-
+from mav_sim.tools.rotations import (
+    Euler2Quaternion,
+    Quaternion2Euler,
+    Quaternion2Rotation,
+)
 
 
 # Indexing constants for state using Euler representation
