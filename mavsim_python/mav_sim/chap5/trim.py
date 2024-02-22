@@ -5,10 +5,7 @@ compute_trim
         12/29/2018 - RWB
         1/2022 - GND
 """
-from typing import Any, cast
-
 import numpy as np
-import numpy.typing as npt
 from mav_sim.chap3.mav_dynamics_euler import (
     IND_EULER,
     derivatives_euler,
@@ -118,7 +115,13 @@ def velocity_constraint(x: types.NP_MAT, Va_desired: float) -> float:
     Returns:
         Va^2 - Va_desired^2
     """
-    return 0.
+    # Extract the state and input
+    state, _ = extract_state_input(x)
+
+    # Calculate va_2
+    va_2 = state[3]**2 + state[4]**2 + state[5]**2
+
+    return float(va_2 - Va_desired**2)
 
 def velocity_constraint_partial(x: types.NP_MAT) -> list[float]:
     """Defines the partial of the velocity constraint with respect to x
@@ -130,7 +133,15 @@ def velocity_constraint_partial(x: types.NP_MAT) -> list[float]:
     Returns:
         16 element list containing the partial of the constraint wrt x
     """
-    return [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]
+    # Extract the state and input
+    state, _ = extract_state_input(x)
+
+    # ewtunr list od 16 0s
+    partial = [0.]*16
+    partial[3] = 2*state.item(3) # partial wrt u
+    partial[4] = 2*state.item(4) # partial wrt v
+    partial[5] = 2*state.item(5) # partial wrt w
+    return partial
 
 def variable_bounds(state0: types.DynamicStateEuler, eps: float) -> tuple[list[float], list[float]]:
     """Define the upper and lower bounds of each the states and inputs as one vector.
@@ -149,21 +160,21 @@ def variable_bounds(state0: types.DynamicStateEuler, eps: float) -> tuple[list[f
         ub: 16 element list defining the upper bound of each variable
     """
     # -lower             pn                 pe                             pd
-    lb = [  state0.item(IND_EULER.NORTH),   0.,                            0.,
+    lb = [  state0.item(IND_EULER.NORTH),   state0.item(IND_EULER.EAST),                  state0.item(IND_EULER.DOWN),
         #      u     v     w        phi       theta          psi
-            -np.inf, 0.,  0.,        0.,    -np.pi/2+.1,     0.,
+            -np.inf, 0.,  -np.inf,        -np.pi/2,    -np.pi/2+.1,     state0.item(IND_EULER.PSI),
         #   p,  q,     r
-            0., 0.,   0.,
+            0., 0.,   -np.inf,
         #    \delta_e   \delta_a  \delta_r   \delta_t
-            -np.pi/2,     0.,      0.,        0]
+            -np.pi/2,     -np.pi/2,      -np.pi/2,        0.]
     # -upper             pn                       pe                             pd
-    ub = [  state0.item(IND_EULER.NORTH)+eps,     0.,                            0.,
+    ub = [  state0.item(IND_EULER.NORTH)+eps,    state0.item(IND_EULER.EAST)+eps, state0.item(IND_EULER.DOWN)+eps,
         #      u     v          w        phi       theta          psi
-             np.inf, 0.,        0.,    0.,       np.pi/2-.1,       0.,
+             np.inf, 0.+eps,        np.inf,    np.pi/2,       np.pi/2-.1,        state0.item(IND_EULER.PSI)+eps,
         #   p,      q,       r
-            0.+eps,  0.,    0.,
+            0.+eps,  0.+eps,    np.inf,
         #    \delta_e   \delta_a  \delta_r   \delta_t
-             np.pi/2,      0.,       0.,       0.]
+             np.pi/2,      np.pi/2,       np.pi/2,       1.]
     return lb, ub
 
 def trim_objective_fun(x: types.NP_MAT, Va: float, gamma: float, R: float, psi_weight: float) -> float:
@@ -184,15 +195,34 @@ def trim_objective_fun(x: types.NP_MAT, Va: float, gamma: float, R: float, psi_w
     # Extract the state and input
     state, delta = extract_state_input(x)
 
-    # Calculate the desired trim trajectory dynamics
+    state_quat = euler_state_to_quat_state(state)
 
+    # Calculate the desired trim trajectory dynamics
+    trim_dynamics = np.zeros((12,1))
+    trim_dynamics[IND_EULER.DOWN] = -Va*np.sin(gamma)
+    trim_dynamics[IND_EULER.PSI] = Va*np.cos(gamma)/R
 
     # Calculate forces
+    Va, alpha, beta, _ = update_velocity_data(state=state_quat)
+    forces = forces_moments(state=state_quat, delta=delta, Va=Va, alpha=alpha, beta=beta)
 
     # Calculate the dynamics based upon the current state and input (use euler derivatives)
+    dynamics = derivatives_euler(state=state, forces_moments=forces)
 
     # Calculate the difference between the desired and actual
-
+    diff = trim_dynamics - dynamics
 
     # Calculate the square of the difference (neglecting pn and pe)
-    return 0.
+    #declare Q matrix with 1s on the diagonal
+    Q = np.eye(12)
+    #change the first 2 diagnals to 0 and the 8th to psi_weight
+    Q[0,0] = 0
+    Q[1,1] = 0
+    Q[8,8] = psi_weight
+
+    #matrix multiplication diff^T*Q*diff
+    J = diff.T @ Q @ diff
+    #extract the value
+    J = J.item(0)
+
+    return float(J)
