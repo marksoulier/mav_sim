@@ -36,5 +36,6 @@ class PDControlWithRate:
         Output:
             u_sat: a saturated pd controller
         """
-        u_sat = 0.
+        u = self.kp * (y_ref - y) - self.kd * ydot
+        u_sat = saturate(in_val=u, up_limit=self.limit, low_limit=-self.limit)
         return u_sat
