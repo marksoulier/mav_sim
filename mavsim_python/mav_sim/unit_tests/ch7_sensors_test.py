@@ -1,4 +1,5 @@
 """ch7_sensors_tests.py: Implements some basic tests for the chapter 7 martial."""
+
 # pylint: disable=too-many-lines
 
 import itertools

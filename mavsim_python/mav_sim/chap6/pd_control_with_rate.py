@@ -5,6 +5,7 @@ pd_control
         2/6/2019 - RWB
         12/21 - GND
 """
+
 from mav_sim.tools.wrap import saturate
 
 
@@ -13,7 +14,8 @@ class PDControlWithRate:
     PD control with rate information (i.e., the derivative is given as an input to update function)
     u = kp*(yref-y) - kd*ydot
     """
-    def __init__(self, kp: float =0.0, kd: float =0.0, limit: float =1.0) -> None:
+
+    def __init__(self, kp: float = 0.0, kd: float = 0.0, limit: float = 1.0) -> None:
         """Store control values
 
         Args:
@@ -39,3 +41,13 @@ class PDControlWithRate:
         u = self.kp * (y_ref - y) - self.kd * ydot
         u_sat = saturate(in_val=u, up_limit=self.limit, low_limit=-self.limit)
         return u_sat
+
+
+# if __name__ == "__main__":
+#     kp = 1.23
+#     kd = 4.56
+#     y_ref = 2.0
+#     y = 1.23
+#     ydot = 2.34
+#     u = kp * (y_ref - y) - kd * ydot
+#     print(u)

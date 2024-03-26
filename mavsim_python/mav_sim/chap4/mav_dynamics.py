@@ -8,6 +8,7 @@ part of mavPySim
     - Update history:
         12/20/2018 - RWB
 """
+
 from typing import Optional, cast
 
 import mav_sim.parameters.aerosonde_parameters as MAV

@@ -8,6 +8,7 @@ mavsim_python
     - Update history:
         2/24/2020 - RWB
 """
+
 from typing import Any, Optional, cast
 
 import mav_sim.parameters.aerosonde_parameters as MAV
@@ -32,16 +33,15 @@ from mav_sim.tools.rotations import (
 
 
 class GpsTransient:
-    """Struct for storing the gps transient (represent a Guass-Markov process)
-    """
+    """Struct for storing the gps transient (represent a Guass-Markov process)"""
 
     def __init__(self, nu_n: float, nu_e: float, nu_h: float) -> None:
         """Initialize the gps transient elements
 
-            Args:
-                nu_n: Transient in the north direction
-                nu_e: Transient in the east direction
-                nu_h: Transient in the altitude
+        Args:
+            nu_n: Transient in the north direction
+            nu_e: Transient in the east direction
+            nu_h: Transient in the altitude
         """
         self.n = nu_n
         self.e = nu_e
@@ -59,16 +59,12 @@ class GpsTransient:
         )
 
     def print(self) -> None:
-        """Print the commands to the console
-        """
-        print('n=', self.n,
-              'e=', self.e,
-              'h=', self.h)
+        """Print the commands to the console"""
+        print("n=", self.n, "e=", self.e, "h=", self.h)
 
 
 class MavDynamics:
-    """Implements the dynamics of the MAV using vehicle inputs and wind
-    """
+    """Implements the dynamics of the MAV using vehicle inputs and wind"""
 
     def __init__(self, Ts: float, state: Optional[DynamicState] = None):
         self._ts_simulation = Ts
@@ -84,10 +80,10 @@ class MavDynamics:
             self._state = state.convert_to_numpy()
 
         # store wind data for fast recall since it is used at various points in simulation
-        self._wind = np.array([[0.], [0.], [0.]])  # wind in NED frame in meters/sec
+        self._wind = np.array([[0.0], [0.0], [0.0]])  # wind in NED frame in meters/sec
 
         # store forces to avoid recalculation in the sensors function
-        self._forces = np.array([[0.], [0.], [0.]])
+        self._forces = np.array([[0.0], [0.0], [0.0]])
         self._Va = MAV.u0
         self._alpha: float = 0
         self._beta: float = 0
@@ -99,21 +95,24 @@ class MavDynamics:
         self._sensors = MsgSensors()
 
         # random walk parameters for GPS
-        self._gps_nu_n: float = 0.
-        self._gps_nu_e: float = 0.
-        self._gps_nu_h: float = 0.
+        self._gps_nu_n: float = 0.0
+        self._gps_nu_e: float = 0.0
+        self._gps_nu_h: float = 0.0
         # timer so that gps only updates every ts_gps seconds
-        self._t_gps = 999.  # large value ensures gps updates at initial time.
+        self._t_gps = 999.0  # large value ensures gps updates at initial time.
 
         # update velocity data
-        (self._Va, self._alpha, self._beta, self._wind) = update_velocity_data(self._state)
+        (self._Va, self._alpha, self._beta, self._wind) = update_velocity_data(
+            self._state
+        )
 
         # Update forces and moments data
-        forces_moments_vec = forces_moments(self._state, MsgDelta(), self._Va, self._beta, self._alpha)
+        forces_moments_vec = forces_moments(
+            self._state, MsgDelta(), self._Va, self._beta, self._alpha
+        )
         self._forces[0] = forces_moments_vec.item(0)
         self._forces[1] = forces_moments_vec.item(1)
         self._forces[2] = forces_moments_vec.item(2)
-
 
     ###################################
     # public functions
@@ -126,7 +125,9 @@ class MavDynamics:
             wind: the wind vector in inertial coordinates
         """
         # get forces and moments acting on rigid bod
-        forces_moments_vec = forces_moments(self._state, delta, self._Va, self._beta, self._alpha)
+        forces_moments_vec = forces_moments(
+            self._state, delta, self._Va, self._beta, self._alpha
+        )
         self._forces[0] = forces_moments_vec.item(0)
         self._forces[1] = forces_moments_vec.item(1)
         self._forces[2] = forces_moments_vec.item(2)
@@ -134,36 +135,38 @@ class MavDynamics:
         # Integrate ODE using Runge-Kutta RK4 algorithm
         time_step = self._ts_simulation
         k1 = derivatives(self._state, forces_moments_vec)
-        k2 = derivatives(self._state + time_step/2.*k1, forces_moments_vec)
-        k3 = derivatives(self._state + time_step/2.*k2, forces_moments_vec)
-        k4 = derivatives(self._state + time_step*k3, forces_moments_vec)
-        self._state += time_step/6 * (k1 + 2*k2 + 2*k3 + k4)
+        k2 = derivatives(self._state + time_step / 2.0 * k1, forces_moments_vec)
+        k3 = derivatives(self._state + time_step / 2.0 * k2, forces_moments_vec)
+        k4 = derivatives(self._state + time_step * k3, forces_moments_vec)
+        self._state += time_step / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
 
         # normalize the quaternion
         e0 = self._state.item(IND.E0)
         e1 = self._state.item(IND.E1)
         e2 = self._state.item(IND.E2)
         e3 = self._state.item(IND.E3)
-        norm_e = np.sqrt(e0**2+e1**2+e2**2+e3**2)
-        self._state[IND.E0][0] = self._state.item(IND.E0)/norm_e
-        self._state[IND.E1][0] = self._state.item(IND.E1)/norm_e
-        self._state[IND.E2][0] = self._state.item(IND.E2)/norm_e
-        self._state[IND.E3][0] = self._state.item(IND.E3)/norm_e
+        norm_e = np.sqrt(e0**2 + e1**2 + e2**2 + e3**2)
+        self._state[IND.E0][0] = self._state.item(IND.E0) / norm_e
+        self._state[IND.E1][0] = self._state.item(IND.E1) / norm_e
+        self._state[IND.E2][0] = self._state.item(IND.E2) / norm_e
+        self._state[IND.E3][0] = self._state.item(IND.E3) / norm_e
 
         # update the airspeed, angle of attack, and side slip angles using new state
-        (self._Va, self._alpha, self._beta, self._wind) = update_velocity_data(self._state, wind)
+        (self._Va, self._alpha, self._beta, self._wind) = update_velocity_data(
+            self._state, wind
+        )
 
         # update the message class for the true state
         self._update_true_state()
 
         # update the gps timer
         if self._t_gps >= SENSOR.ts_gps:
-            self._t_gps = 0.
+            self._t_gps = 0.0
         else:
             self._t_gps += self._ts_simulation
 
-    def sensors(self, noise_scale: float = 1.) -> MsgSensors:
-        """ Return the values of the sensors given the current state. Note that GPS
+    def sensors(self, noise_scale: float = 1.0) -> MsgSensors:
+        """Return the values of the sensors given the current state. Note that GPS
         is only updated periodically according to the period SENSOR.ts_gps
 
         Args:
@@ -176,8 +179,15 @@ class MavDynamics:
         nu = GpsTransient(self._gps_nu_n, self._gps_nu_e, self._gps_nu_h)
 
         # Calculate sensor readings
-        self._sensors, nu_update = calculate_sensor_readings(self._state, self._forces, \
-            nu, self._Va, self._sensors, self._t_gps == 0., noise_scale)
+        self._sensors, nu_update = calculate_sensor_readings(
+            self._state,
+            self._forces,
+            nu,
+            self._Va,
+            self._sensors,
+            self._t_gps == 0.0,
+            noise_scale,
+        )
 
         # Extract values and return sensor readings
         self._gps_nu_n = nu_update.n
@@ -186,19 +196,17 @@ class MavDynamics:
         return self._sensors
 
     def external_set_state(self, new_state: types.DynamicState) -> None:
-        """Loads a new state
-        """
+        """Loads a new state"""
         self._state = new_state
 
     def get_state(self) -> types.DynamicState:
-        """Returns the state
-        """
+        """Returns the state"""
         return self._state
 
     ###################################
     # private functions
     def _update_true_state(self) -> None:
-        """ update the class structure for the true state:
+        """update the class structure for the true state:
 
         [pn, pe, h, Va, alpha, beta, phi, theta, chi, p, q, r, Vg, wn, we, psi, gyro_bx, gyro_by, gyro_bz]
         """
@@ -226,38 +234,100 @@ class MavDynamics:
         self.true_state.by = SENSOR.gyro_y_bias
         self.true_state.bz = SENSOR.gyro_z_bias
 
-def calculate_sensor_readings(state: types.DynamicState, forces: types.NP_MAT, \
-    nu: GpsTransient, Va: float, sensors_prev: MsgSensors, update_gps: bool, noise_scale: float = 1.) -> \
-    tuple[MsgSensors, GpsTransient]:
-    """ Calculates the sensor readings. This involves calculating the sensor data without
-        noise and then adding in the noise.
 
-        Sensor values: gyros, accelerometers, absolute_pressure, dynamic_pressure
-                       and GPS
+def calculate_sensor_readings(
+    state: types.DynamicState,
+    forces: types.NP_MAT,
+    nu: GpsTransient,
+    Va: float,
+    sensors_prev: MsgSensors,
+    update_gps: bool,
+    noise_scale: float = 1.0,
+) -> tuple[MsgSensors, GpsTransient]:
+    """Calculates the sensor readings. This involves calculating the sensor data without
+    noise and then adding in the noise.
 
-        Args:
-            state: current state of the aircraft
-            forces: 3x1 forces vector acting on UAV (in body frame)
-            nu: Latest GPS transients
-            Va: airspeed
-            sensors_prev: previous readings of the sensors
-            update_gps: true - update the gps sensor, false - use the previous gps reading
-            noise_scale: Scaling on the random white noise
+    Sensor values: gyros, accelerometers, absolute_pressure, dynamic_pressure
+                   and GPS
 
-        Returns:
-            sensors: The resulting sensor readings
-            nu_update: The updated gps transients
+    Args:
+        state: current state of the aircraft
+        forces: 3x1 forces vector acting on UAV (in body frame)
+        nu: Latest GPS transients
+        Va: airspeed
+        sensors_prev: previous readings of the sensors
+        update_gps: true - update the gps sensor, false - use the previous gps reading
+        noise_scale: Scaling on the random white noise
+
+    Returns:
+        sensors: The resulting sensor readings
+        nu_update: The updated gps transients
     """
     # Intialize the sensor reading
     sensors = MsgSensors()
+    state_n = DynamicState(state)
+    quat = np.array(
+        [
+            [state.item(IND.E0)],
+            [state.item(IND.E1)],
+            [state.item(IND.E2)],
+            [state.item(IND.E3)],
+        ]
+    )
+    euler_angles = Quaternion2Euler(quaternion=quat)
 
+    sensors.gyro_x, sensors.gyro_y, sensors.gyro_z = gyro(
+        p=state_n.p,
+        q=state_n.q,
+        r=state_n.r,
+        noise_scale=noise_scale,
+    )
+    sensors.accel_x, sensors.accel_y, sensors.accel_z = accelerometer(
+        phi=euler_angles[0],
+        theta=euler_angles[1],
+        forces=forces,
+        noise_scale=noise_scale,
+    )
+    sensors.abs_pressure, sensors.diff_pressure = pressure(
+        down=state_n.down, Va=Va, noise_scale=noise_scale
+    )
 
+    # work on these
+    sensors.mag_x, sensors.mag_y, sensors.mag_z = magnetometer(
+        quat_b_to_i=quat, noise_scale=noise_scale
+    )
 
     # Populate all other sensors
     # simulate GPS sensor
+
     if update_gps:
         # Update the gps transient bias
-        nu_update = GpsTransient(nu.n, nu.e, nu.h) # Remove this line
+        nu_update = gps_error_trans_update(nu=nu, noise_scale=noise_scale)
+        (
+            sensors.gps_n,
+            sensors.gps_e,
+            sensors.gps_h,
+            sensors.gps_Vg,
+            sensors.gps_course,
+        ) = gps(
+            position=np.array(
+                [  # North, East, Down
+                    [state_n.north],
+                    [state_n.east],
+                    [state_n.down],
+                ]
+            ),
+            V_g_b=np.array(
+                [  # Body frame velocities
+                    [state_n.u],
+                    [state_n.v],
+                    [state_n.w],
+                ]
+            ),
+            e_quat=quat,
+            nu=nu_update,
+            noise_scale=noise_scale,
+        )
 
     else:
         # Output previous values
@@ -271,82 +341,120 @@ def calculate_sensor_readings(state: types.DynamicState, forces: types.NP_MAT, \
 
     return sensors, nu_update
 
-def accelerometer(phi: float, theta: float, forces: types.NP_MAT, noise_scale: float,
-                  accel_sigma: float = SENSOR.accel_sigma ) -> tuple[float, float, float] :
+
+def accelerometer(
+    phi: float,
+    theta: float,
+    forces: types.NP_MAT,
+    noise_scale: float,
+    accel_sigma: float = SENSOR.accel_sigma,
+) -> tuple[float, float, float]:
     """Calculates the accelerometer measurement based upon the current state data
 
-        Args:
-            phi: roll angle
-            theta: pitch angle
-            forces: 3x1 forces vector acting on UAV (in body frame)
-            noise_scale: Scaling on the random white noise
-            accel_sigma: The standard deviation of the accelerometer
+    Args:
+        phi: roll angle
+        theta: pitch angle
+        forces: 3x1 forces vector acting on UAV (in body frame)
+        noise_scale: Scaling on the random white noise
+        accel_sigma: The standard deviation of the accelerometer
 
-        Returns:
-            accel_x, accel_y, accel_z: body frame x-y-z acceleration measurements
+    Returns:
+        accel_x, accel_y, accel_z: body frame x-y-z acceleration measurements
     """
-    accel_x = 0.
-    accel_y = 0.
-    accel_z = 0.
+    accel_x = (
+        forces.item(0) / MAV.mass
+        + MAV.gravity * np.sin(theta)
+        + noise_scale * np.random.normal(0, accel_sigma)
+    )
+    accel_y = (
+        forces.item(1) / MAV.mass
+        - MAV.gravity * np.cos(theta) * np.sin(phi)
+        + noise_scale * np.random.normal(0, accel_sigma)
+    )
+    accel_z = (
+        forces.item(2) / MAV.mass
+        - MAV.gravity * np.cos(theta) * np.cos(phi)
+        + noise_scale * np.random.normal(0, accel_sigma)
+    )
 
     return accel_x, accel_y, accel_z
 
-def gyro(p: float, q: float, r: float, noise_scale: float = 1.,
-         gyro_sigma: float = SENSOR.gyro_sigma,
-         gyro_x_bias: float = SENSOR.gyro_x_bias,
-         gyro_y_bias: float = SENSOR.gyro_y_bias,
-         gyro_z_bias: float = SENSOR.gyro_z_bias
-         ) -> tuple[float, float, float] :
+
+def gyro(
+    p: float,
+    q: float,
+    r: float,
+    noise_scale: float = 1.0,
+    gyro_sigma: float = SENSOR.gyro_sigma,
+    gyro_x_bias: float = SENSOR.gyro_x_bias,
+    gyro_y_bias: float = SENSOR.gyro_y_bias,
+    gyro_z_bias: float = SENSOR.gyro_z_bias,
+) -> tuple[float, float, float]:
     """Calculates the gyro measurement based upon the current state data
 
-        Args:
-            (p,q,r): body x-y-z roll rates (rad/sec)
-            noise_scale: Scaling on the random white noise
-            gyro_sigma: Standard deviation of the gyro
-            gyro_x_bias: bias in the body x direction
-            gyro_y_bias: bias in the body y direction
-            gyro_z_bias: bias in the body z direction
+    Args:
+        (p,q,r): body x-y-z roll rates (rad/sec)
+        noise_scale: Scaling on the random white noise
+        gyro_sigma: Standard deviation of the gyro
+        gyro_x_bias: bias in the body x direction
+        gyro_y_bias: bias in the body y direction
+        gyro_z_bias: bias in the body z direction
 
-        Returns:
-            gyro_x, gyro_y, gyro_z: body frame x-y-z gyro measurements
+    Returns:
+        gyro_x, gyro_y, gyro_z: body frame x-y-z gyro measurements
     """
-    gyro_x = 0.
-    gyro_y = 0.
-    gyro_z = 0.
+    gyro_x = p + gyro_x_bias + noise_scale * np.random.normal(0, gyro_sigma)
+    gyro_y = q + gyro_y_bias + noise_scale * np.random.normal(0, gyro_sigma)
+    gyro_z = r + gyro_z_bias + noise_scale * np.random.normal(0, gyro_sigma)
 
     return gyro_x, gyro_y, gyro_z
 
-def pressure(down: float, Va: float, noise_scale: float = 1.,
-             abs_pres_bias: float = SENSOR.abs_pres_bias,
-             abs_pres_sigma: float = SENSOR.abs_pres_sigma,
-             diff_pres_bias: float = SENSOR.diff_pres_bias,
-             diff_pres_sigma: float = SENSOR.diff_pres_sigma
-            ) -> tuple[float, float] :
+
+def pressure(
+    down: float,
+    Va: float,
+    noise_scale: float = 1.0,
+    abs_pres_bias: float = SENSOR.abs_pres_bias,
+    abs_pres_sigma: float = SENSOR.abs_pres_sigma,
+    diff_pres_bias: float = SENSOR.diff_pres_bias,
+    diff_pres_sigma: float = SENSOR.diff_pres_sigma,
+) -> tuple[float, float]:
     """Calculates the pressure sensor measurement based upon the current state data
 
-        Args:
-            down: down position
-            Va: airspeed
-            noise_scale: Scaling on the random white noise
-            abs_pres_bias: bias in the absolute pressure measurement
-            abs_pres_sigma: standard deviation in the absolute pressure measurement
-            diff_pres_bias: bias in the differential pressure measurement
-            diff_pres_sigma: standard deviation in the differential pressure measurement
+    Args:
+        down: down position
+        Va: airspeed
+        noise_scale: Scaling on the random white noise
+        abs_pres_bias: bias in the absolute pressure measurement
+        abs_pres_sigma: standard deviation in the absolute pressure measurement
+        diff_pres_bias: bias in the differential pressure measurement
+        diff_pres_sigma: standard deviation in the differential pressure measurement
 
-        Returns:
-            abs_pressure: Absolute pressure measurement
-            diff_pressure: Differential pressure measurement
+    Returns:
+        abs_pressure: Absolute pressure measurement
+        diff_pressure: Differential pressure measurement
     """
-    abs_pressure = 0.
-    diff_pressure = 0.
+    abs_pressure = (
+        MAV.rho * MAV.gravity * (-down)
+        + abs_pres_bias
+        + noise_scale * np.random.normal(0, abs_pres_sigma)
+    )
+    diff_pressure = (
+        MAV.rho * Va**2 / 2.0
+        + diff_pres_bias
+        + noise_scale * np.random.normal(0, diff_pres_sigma)
+    )
 
     return abs_pressure, diff_pressure
 
-def magnetometer(quat_b_to_i: types.Quaternion, noise_scale: float = 1.,
-                 mag_inc: float = SENSOR.mag_inc,
-                 mag_dec: float = SENSOR.mag_dec,
-                 mag_sigma: float = SENSOR.mag_sigma
-                ) -> tuple[float, float, float] :
+
+def magnetometer(
+    quat_b_to_i: types.Quaternion,
+    noise_scale: float = 1.0,
+    mag_inc: float = SENSOR.mag_inc,
+    mag_dec: float = SENSOR.mag_dec,
+    mag_sigma: float = SENSOR.mag_sigma,
+) -> tuple[float, float, float]:
     """Calculates the magnetometer measurement based upon the current state. The resulting
     output is a magnetometer reading in the body frame with additive noise. Note that this
     is not in the book
@@ -362,66 +470,107 @@ def magnetometer(quat_b_to_i: types.Quaternion, noise_scale: float = 1.,
             mag_x, mag_y, mag_z: body frame x-y-z magnetometer measurements
     """
 
-    mag_x = 0.
-    mag_y = 0.
-    mag_z = 0.
+    R_inertial_to_mag = Euler2Rotation(0.0, mag_inc, mag_dec)
+    m_m = np.array([[1], [0], [0]])
+    mag_i = R_inertial_to_mag.T @ m_m
+
+    # Calculate the magnetic field in the body frame
+    mag_b = Quaternion2Rotation(quat_b_to_i).T @ mag_i
+
+    mag_x = mag_b.item(0) + noise_scale * np.random.normal(0, mag_sigma)
+    mag_y = mag_b.item(1) + noise_scale * np.random.normal(0, mag_sigma)
+    mag_z = mag_b.item(2) + noise_scale * np.random.normal(0, mag_sigma)
 
     return mag_x, mag_y, mag_z
 
-def gps_error_trans_update(nu: GpsTransient, noise_scale: float = 1.,
-                           gps_k: float = SENSOR.gps_k,
-                           ts_gps: float = SENSOR.ts_gps,
-                           gps_n_sigma: float = SENSOR.gps_n_sigma,
-                           gps_e_sigma: float = SENSOR.gps_e_sigma,
-                           gps_h_sigma: float = SENSOR.gps_h_sigma
-                          ) -> GpsTransient :
+
+def gps_error_trans_update(
+    nu: GpsTransient,
+    noise_scale: float = 1.0,
+    gps_k: float = SENSOR.gps_k,
+    ts_gps: float = SENSOR.ts_gps,
+    gps_n_sigma: float = SENSOR.gps_n_sigma,
+    gps_e_sigma: float = SENSOR.gps_e_sigma,
+    gps_h_sigma: float = SENSOR.gps_h_sigma,
+) -> GpsTransient:
     """Calculates the transient update of the gps error which is based upon a Gauss-Markov process
 
-        Args:
-            nu: the previous value of the transient error
-            noise_scale: Scaling on the random white noise
-            gps_k: 1 / s - time constant of the process
-            ts_gps: period of the gps measurement
-            gps_n_sigma: Standard deviation of the north gps measurement
-            gps_e_sigma: Standard deviation of the east gps measurement
-            gps_h_sigma: Standard deviation of the altitude gps measurement
+    Args:
+        nu: the previous value of the transient error
+        noise_scale: Scaling on the random white noise
+        gps_k: 1 / s - time constant of the process
+        ts_gps: period of the gps measurement
+        gps_n_sigma: Standard deviation of the north gps measurement
+        gps_e_sigma: Standard deviation of the east gps measurement
+        gps_h_sigma: Standard deviation of the altitude gps measurement
 
-        Returns:
-            nu: Updated GPS transient
+    Returns:
+        nu: Updated GPS transient
     """
 
-    nu_n = 0.
-    nu_e = 0.
-    nu_h = 0.
+    nu_n = (
+        np.exp(-gps_k * ts_gps) * nu.n + np.random.normal(0, gps_n_sigma) * noise_scale
+    )
+    nu_e = (
+        np.exp(-gps_k * ts_gps) * nu.e + np.random.normal(0, gps_e_sigma) * noise_scale
+    )
+    nu_h = (
+        np.exp(-gps_k * ts_gps) * nu.h + np.random.normal(0, gps_h_sigma) * noise_scale
+    )
 
     return GpsTransient(nu_n, nu_e, nu_h)
 
-def gps(position: types.NP_MAT, V_g_b: types.NP_MAT, e_quat: types.Quaternion, nu: GpsTransient, \
-    noise_scale: float = 1.,
+
+def gps(
+    position: types.NP_MAT,
+    V_g_b: types.NP_MAT,
+    e_quat: types.Quaternion,
+    nu: GpsTransient,
+    noise_scale: float = 1.0,
     gps_Vg_sigma: float = SENSOR.gps_Vg_sigma,
-    gps_course_sigma: float = SENSOR.gps_course_sigma
-     ) -> tuple[float, float, float, float, float] :
+    gps_course_sigma: float = SENSOR.gps_course_sigma,
+) -> tuple[float, float, float, float, float]:
     """Calculates the transient update of the gps error which is based upon a Gauss-Markov process
 
-        Args:
-            position: 3x1 vector of position (north, east, down)
-            V_g_b: 3x1 vector of velocities in body frame
-            e_quat: 4x1 vector consisting of the quaternion (e0, ex, ey, ez)
-            nu: the current value of transient error
-            noise_scale: Scaling on the random white noise
-            gps_Vg_sigma: Standard deviation of the ground velocity measurement
-            gps_course_sigma: Standard deviation of the course angle measurement
+    Args:
+        position: 3x1 vector of position (north, east, down)
+        V_g_b: 3x1 vector of velocities in body frame
+        e_quat: 4x1 vector consisting of the quaternion (e0, ex, ey, ez)
+        nu: the current value of transient error
+        noise_scale: Scaling on the random white noise
+        gps_Vg_sigma: Standard deviation of the ground velocity measurement
+        gps_course_sigma: Standard deviation of the course angle measurement
 
-        Returns:
-            (gps_n, gps_e, gps_h): (n,e,-d) measurement of position
-            gps_Vg: Ground velocity measurement from GPS
-            gps_course: GPS measurement of course angle
+    Returns:
+        (gps_n, gps_e, gps_h): (n,e,-d) measurement of position
+        gps_Vg: Ground velocity measurement from GPS
+        gps_course: GPS measurement of course angle
     """
 
-    gps_n = 0.
-    gps_e = 0.
-    gps_h = 0.
-    gps_Vg = 0.
-    gps_course = 0.
+    # calculate rotation matrix from body to inertial frame
+    R = Quaternion2Rotation(e_quat)
+
+    # calculate the ground velocity in the inertial frame
+    V_g_i = R @ V_g_b
+
+    gps_n = (
+        position.item(IND.NORTH)
+        + nu.n
+        + noise_scale * np.random.normal(0, gps_Vg_sigma)
+    )
+    gps_e = (
+        position.item(IND.EAST) + nu.e + noise_scale * np.random.normal(0, gps_Vg_sigma)
+    )
+    gps_h = (
+        -position.item(IND.DOWN)
+        + nu.h
+        + noise_scale * np.random.normal(0, gps_Vg_sigma)
+    )
+    gps_Vg = np.sqrt(
+        V_g_i.item(0) ** 2 + V_g_i.item(1) ** 2
+    ) + noise_scale * np.random.normal(0, gps_Vg_sigma)
+    gps_course = np.arctan2(
+        V_g_i.item(1), V_g_i.item(0)
+    ) + noise_scale * np.random.normal(0, gps_course_sigma)
 
     return gps_n, gps_e, gps_h, gps_Vg, gps_course
