@@ -6,6 +6,7 @@ mavsim_python
         2/27/2020 - RWB
         3/2022 - GND
 """
+
 import numpy as np
 from mav_sim.chap3.mav_dynamics import DynamicState
 from mav_sim.chap10.run_sim import run_sim
@@ -15,15 +16,14 @@ from mav_sim.message_types.msg_state import MsgState
 
 
 def main() -> None:
-    """Provide a test scenario for chapter 10
-    """
+    """Provide a test scenario for chapter 10"""
     # Initialize the simulation parameters
-    sim_params = MsgSimParams(end_time=50.) # Sim ending in 10 seconds
+    sim_params = MsgSimParams(end_time=50.0)  # Sim ending in 10 seconds
     state = DynamicState()
 
     # path definition
     path = MsgPath()
-    path.type = 'line'
+    path.type = "line"
     path.line_origin = np.array([[0.0, 0.0, -100.0]]).T
     path.line_direction = np.array([[0.5, 1.0, 0.0]]).T
     path.line_direction = path.line_direction / np.linalg.norm(path.line_direction)
@@ -38,11 +38,14 @@ def main() -> None:
 
     # Run the simulation - Note that while not used, the viewer objects
     # need to remain active to keep the windows open
-    (path_view, data_view) = run_sim(sim=sim_params, path_fnc=constant_path, init_state=state) #pylint: disable=unused-variable
+    (path_view, data_view) = run_sim(  # pylint: disable=unused-variable
+        sim=sim_params, path_fnc=constant_path, init_state=state
+    )
 
     # Wait until user is finished
     print("Press any key to close")
     input()
+
 
 if __name__ == "__main__":
     main()

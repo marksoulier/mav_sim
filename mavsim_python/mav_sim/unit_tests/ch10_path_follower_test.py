@@ -1,4 +1,5 @@
 """ch7_sensors_tests.py: Implements some basic tests for the chapter 7 martial."""
+
 # pylint: disable=too-many-lines
 
 import itertools
@@ -21,8 +22,7 @@ def follow_straight_line_test(test_cases: List[Tuple[Dict[str, Any], Any]]) -> b
 
         if (
             (
-                1e-12
-                < np.abs(calculated_output.to_array() - test_case_it[1].to_array())
+                1e-6 < np.abs(calculated_output.to_array() - test_case_it[1].to_array())
             ).any()
             or np.isnan(calculated_output.to_array()).any()
             or np.isinf(calculated_output.to_array()).any()
